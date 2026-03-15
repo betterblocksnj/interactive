@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How a Five-Year Tax Exemption Actually Works | Better Blocks NJ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #2C3E50; background: #fff; padding: 1rem; max-width: 640px; margin: 0 auto; }
+  .title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: #666; margin-bottom: 20px; }
+  .chart-wrap { position: relative; width: 100%; height: 340px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; font-size: 12px; color: #666; }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 2px; }
+  .note { font-size: 11px; color: #999; margin-top: 12px; }
+</style>
+</head>
+<body>
+<p class="title">How a five-year tax exemption actually works</p>
+<p class="subtitle">Property taxes phase in over five years — the owner pays conventional tax on the pre-improvement value the entire time</p>
+<div class="chart-wrap"><canvas id="chart"></canvas></div>
+<div class="legend">
+  <span><span class="dot" style="background:#185FA5;"></span>Tax on pre-improvement value (paid to city, county, and schools)</span>
+  <span><span class="dot" style="background:#1D9E75;"></span>Tax on improvement (phasing in — paid to city, county, and schools)</span>
+  <span><span class="dot" style="background:#D3D1C7;"></span>Exempt portion (temporary — expires after 5 years)</span>
+</div>
+<p class="note">Example: $50,000 land assessed at 2% tax rate, $100,000 improvement. All non-exempt taxes flow pro rata to city (43%), schools (37%), and county (20%).</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+new Chart(document.getElementById('chart'), {
+  type: 'bar',
+  data: {
+    labels: ['Before\nproject','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6+\n(full tax)'],
+    datasets: [
+      {label:'Pre-improvement tax',data:[1000,1000,1000,1000,1000,1000,1000],backgroundColor:'#185FA5',borderRadius:0},
+      {label:'Improvement tax (phasing in)',data:[0,0,400,800,1200,1600,2000],backgroundColor:'#1D9E75',borderRadius:0},
+      {label:'Exempt portion',data:[0,2000,1600,1200,800,400,0],backgroundColor:'#D3D1C7',borderRadius:{topLeft:4,topRight:4}}
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': $'+c.raw.toLocaleString();}}}},
+    scales:{
+      x:{stacked:true,grid:{display:false},ticks:{font:{size:11},color:'#888'}},
+      y:{stacked:true,grid:{color:'rgba(0,0,0,0.06)'},ticks:{font:{size:11},color:'#888',callback:function(v){return '$'+v.toLocaleString();}},title:{display:true,text:'Annual property tax',font:{size:11},color:'#888'}}
+    }
+  }
+});
+</script>
+</body>
+</html>

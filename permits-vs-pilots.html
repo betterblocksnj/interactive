@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction and PILOT Agreements in Jersey City | Better Blocks NJ</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2C3E50;background:#fff;padding:1rem;max-width:680px;margin:0 auto}
+  .title{font-size:14px;font-weight:600;margin-bottom:4px}
+  .subtitle{font-size:12px;color:#666;margin-bottom:20px}
+  .chart-wrap{position:relative;width:100%;height:340px}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin:12px 0 16px;font-size:12px;color:#666}
+  .legend span{display:flex;align-items:center;gap:4px}
+  .legend .dot{width:10px;height:10px;border-radius:2px}
+  .legend .line{width:3px;height:10px;border-left:2px dashed #1D9E75}
+  .metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+  .metric{background:#f8f8f6;border-radius:8px;padding:12px;text-align:center}
+  .metric .lbl{font-size:11px;color:#666;margin:0 0 2px}
+  .metric .val{font-size:22px;font-weight:500;margin:0}
+  .info{background:#E6F1FB;border-radius:12px;padding:14px}
+  .info p{font-size:12px;color:#185FA5;margin:0}
+</style>
+</head>
+<body>
+<p class="title">Construction and PILOT agreements in Jersey City (2013–2025)</p>
+<p class="subtitle">Only 7.4% of residential permits were paired with a PILOT agreement — and since 2018, the rate has been near zero. Most new housing pays full conventional taxes.</p>
+<div class="chart-wrap"><canvas id="chart"></canvas></div>
+<div class="legend">
+  <span><span class="dot" style="background:#185FA5"></span>Residential permits issued</span>
+  <span><span class="dot" style="background:#D85A30"></span>Signed PILOT agreements</span>
+  <span><span class="line"></span>% of projects with PILOT (right axis)</span>
+</div>
+<div class="metrics">
+  <div class="metric"><p class="lbl">Total permits (2013–2025)</p><p class="val">1,542</p></div>
+  <div class="metric"><p class="lbl">Total PILOTs signed</p><p class="val">114</p></div>
+  <div class="metric"><p class="lbl">PILOTs since 2018</p><p class="val">8</p></div>
+</div>
+<div class="info"><p>The vast majority of Jersey City's housing boom has been built on the conventional tax roll — not on PILOTs. The early PILOTs (2013–2017) were concentrated in former industrial zones, railyards, and brownfield sites. Since 2018, the city has signed only 8 new PILOT agreements, mostly for affordable housing or major community givebacks.</p></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var years=['2013','2014','2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+var permits=[36,76,99,127,141,152,146,117,142,147,98,120,141];
+var pilots=[12,27,21,29,16,1,1,0,0,0,2,1,4];
+var pct=permits.map(function(p,i){return pilots[i]/p*100;});
+new Chart(document.getElementById('chart'),{
+  type:'bar',
+  data:{labels:years,datasets:[
+    {label:'Residential permits',data:permits,backgroundColor:'#185FA5',borderRadius:4,order:2,yAxisID:'y'},
+    {label:'PILOT agreements',data:pilots,backgroundColor:'#D85A30',borderRadius:4,order:1,yAxisID:'y'},
+    {label:'% with PILOT',data:pct,type:'line',borderColor:'#1D9E75',borderWidth:2,borderDash:[6,3],pointBackgroundColor:'#1D9E75',pointRadius:3,pointHoverRadius:5,fill:false,order:0,yAxisID:'y1'}
+  ]},
+  options:{
+    responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){if(c.dataset.label==='% with PILOT')return c.dataset.label+': '+c.raw.toFixed(1)+'%';return c.dataset.label+': '+c.raw;}}}},
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:11},color:'#888',maxRotation:45}},
+      y:{position:'left',beginAtZero:true,grid:{color:'rgba(0,0,0,0.06)'},ticks:{font:{size:11},color:'#888'},title:{display:true,text:'Number of permits / agreements',font:{size:11},color:'#888'}},
+      y1:{position:'right',beginAtZero:true,max:40,grid:{display:false},ticks:{font:{size:11},color:'#1D9E75',callback:function(v){return v+'%';}},title:{display:true,text:'% with PILOT',font:{size:11},color:'#1D9E75'}}
+    }
+  }
+});
+</script>
+</body>
+</html>

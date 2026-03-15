@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affordable Housing Set-Asides: Children and PILOT Costs | Better Blocks NJ</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2C3E50;background:#fff;padding:1rem;max-width:680px;margin:0 auto}
+  .title{font-size:14px;font-weight:600;margin-bottom:4px}
+  .subtitle{font-size:12px;color:#666;margin-bottom:4px}
+  .source{font-size:11px;color:#999;margin-bottom:20px}
+  .slider-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .slider-row label{font-size:13px;color:#666;min-width:180px}
+  .slider-row input[type=range]{flex:1;height:6px;-webkit-appearance:none;background:#ddd;border-radius:3px;outline:none}
+  .slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#185FA5;cursor:pointer}
+  .slider-row span{font-size:13px;font-weight:500;min-width:40px;text-align:right}
+  .btn-group{display:flex;gap:4px}
+  .btn-group button{flex:1;font-size:11px;padding:6px 2px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#2C3E50;cursor:pointer;font-family:inherit}
+  .btn-group button.active{background:#E6F1FB;color:#185FA5;border-color:#85B7EB}
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-bottom:12px}
+  .grid2 p{font-size:12px;font-weight:500;color:#666;margin:0 0 6px}
+  .note{font-size:11px;color:#999;margin:0 0 20px}
+  table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px;min-width:620px}
+  th{text-align:right;padding:8px 4px;color:#666;font-weight:500;border-bottom:2px solid #ccc}
+  th:first-child{text-align:left}
+  td{text-align:right;padding:7px 4px;border-bottom:1px solid #eee}
+  td:first-child{text-align:left;font-weight:500}
+  tr.hl{background:#E6F1FB}
+  .charts{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:20px}
+  .chart-wrap{position:relative;width:100%;height:270px}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px;font-size:11px;color:#666}
+  .legend span{display:flex;align-items:center;gap:4px}
+  .legend .dot{width:10px;height:10px;border-radius:2px}
+  .info{background:#E6F1FB;border-radius:12px;padding:16px;margin-bottom:12px}
+  .info .info-title{font-size:13px;font-weight:500;color:#0C447C;margin:0 0 8px}
+  .info p{font-size:12px;color:#185FA5;margin:0 0 6px}
+  .info p:last-child{margin:0}
+  .footnote{background:#f8f8f6;border-radius:8px;padding:12px}
+  .footnote p{font-size:11px;color:#999;margin:0}
+</style>
+</head>
+<body>
+<p class="title">Affordable housing set-asides: school children, education costs, and PILOT subsidies</p>
+<p class="subtitle">Higher affordable set-asides add more school-age children and require larger PILOT subsidies — but the PILOT revenue typically far exceeds the cost of educating the children the building adds.</p>
+<p class="source">Sources: Davis et al., "School-Age Children in Rental Units in NJ" (Rutgers RCRE, 2018); JCPS budgeted per pupil cost of $26,130 (FY 2024–25); Better Blocks NJ, 177 Grand Street PILOT analysis (2025).</p>
+
+<div class="slider-row"><label>Total units in building</label><input type="range" min="50" max="1200" value="400" step="10" id="ru" oninput="rc()"><span id="ruO">400</span></div>
+<div class="grid2">
+<div><p>Building type</p><div class="btn-group"><button id="bt-h" onclick="sT('high')">High-rise</button><button id="bt-m" onclick="sT('mid')">Mid-rise</button><button id="bt-l" onclick="sT('low')">Low-rise</button></div></div>
+<div><p>Market-rate avg. HH income</p><div class="btn-group"><button id="bi-h" onclick="sI('high')">$100K+</button><button id="bi-m" onclick="sI('mid')">$50–100K</button><button id="bi-l" onclick="sI('low')">&lt;$50K</button></div></div>
+</div>
+<p class="note">Bedroom mix: 50% studios/1BR, 40% 2BR, 10% 3BR+ (typical JC high-rise)</p>
+
+<div style="overflow-x:auto;margin-bottom:20px">
+<table>
+<thead><tr><th style="text-align:left">Aff. %</th><th>Aff. units</th><th>Mkt. units</th><th>Children in mkt-rate</th><th>Children in aff.</th><th>Total</th><th>Annual ed. cost</th><th>PILOT subsidy (NPV)</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<div class="charts">
+<div class="chart-wrap"><canvas id="ch1"></canvas></div>
+<div class="chart-wrap"><canvas id="ch2"></canvas></div>
+</div>
+<div class="legend">
+  <span><span class="dot" style="background:#185FA5"></span>Children in market-rate housing</span>
+  <span><span class="dot" style="background:#D85A30"></span>Children in affordable housing</span>
+  <span><span class="dot" style="background:#1D9E75"></span>PILOT subsidy (NPV)</span>
+  <span><span class="dot" style="background:#BA7517"></span>Annual education cost</span>
+</div>
+
+<div class="info">
+<p class="info-title">What this shows</p>
+<p>At <strong>15% affordable</strong> on a typical high-income high-rise, the building adds roughly <strong id="ins_kids">21</strong> school-age children costing about <strong id="ins_edcost">$549K</strong>/year to educate — while the PILOT generates millions in annual revenue for the city. The children come overwhelmingly from the affordable units.</p>
+<p>PILOTs make the affordable housing financially viable. Without the PILOT, neither the affordable units nor the market-rate units get built — and the school district gets <strong>zero</strong> new students, <strong>zero</strong> new revenue, and the lot continues paying next to nothing.</p>
+<p>At $26,130 per pupil, the annual cost to educate the children from a PILOT building is a fraction of the PILOT revenue the city receives — revenue that creates fiscal space for the school levy as we explain in Myth 3.</p>
+</div>
+
+<div class="footnote"><p>PILOT subsidy: $245,829 NPV per affordable unit from NW Financial analysis of 177 Grand Street (conservative floor). Per pupil cost: $26,130 budgeted for JCPS FY 2024–25. Rutgers multipliers based on survey of 251 NJ rental developments covering 40,000+ units.</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var bT='high',iL='high',c1,c2;
+var pcts=[0,5,10,15,20];
+var CPU=245829,PPP=26130;
+var mk={high:{high:{s:.4,t:2.2,h:4.3},mid:{s:1.3,t:8.9,h:23.9},low:{s:1.9,t:28.2,h:61.8}},mid:{high:{s:1.3,t:8.9,h:23.9},mid:{s:1.6,t:13.4,h:17.6},low:{s:7.6,t:56.7,h:63}},low:{high:{s:1.9,t:28.2,h:61.8},mid:{s:7.6,t:56.7,h:63},low:{s:11.4,t:126.4,h:137.9}}};
+var af={s:10.3,t:72.1,h:108.9};
+function act(id,on){var e=document.getElementById(id);if(on){e.classList.add('active')}else{e.classList.remove('active')}}
+function sT(v){bT=v;['bt-h','bt-m','bt-l'].forEach(function(id){act(id,false)});act('bt-'+v[0],true);rc();}
+function sI(v){iL=v;['bi-h','bi-m','bi-l'].forEach(function(id){act(id,false)});act('bi-'+v[0],true);rc();}
+function calc(total,p){var aU=Math.round(total*p/100),mU=total-aU,r=mk[bT][iL],m1=Math.round(mU*.5),m2=Math.round(mU*.4),m3=mU-m1-m2,a1=Math.round(aU*.5),a2=Math.round(aU*.4),a3=aU-a1-a2,mC=m1*r.s/100+m2*r.t/100+m3*r.h/100,aC=a1*af.s/100+a2*af.t/100+a3*af.h/100,tC=mC+aC;return{aU:aU,mU:mU,mC:mC,aC:aC,tC:tC,edCost:tC*PPP,pilotCost:aU*CPU};}
+function fM(n){return n>=1e6?'$'+(n/1e6).toFixed(1)+'M':'$'+Math.round(n/1e3)+'K';}
+function fK(n){return '$'+Math.round(n).toLocaleString();}
+function rc(){
+  var total=+document.getElementById('ru').value;document.getElementById('ruO').textContent=total;
+  var tb=document.getElementById('tbody');tb.innerHTML='';
+  var mA=[],aA=[],cA=[],eA=[],labels=[];
+  for(var i=0;i<pcts.length;i++){var p=pcts[i],d=calc(total,p);labels.push(p+'%');mA.push(Math.round(d.mC*10)/10);aA.push(Math.round(d.aC*10)/10);cA.push(Math.round(d.pilotCost));eA.push(Math.round(d.edCost));
+    var tr=document.createElement('tr');if(p===15)tr.className='hl';
+    var cells=[p+'%',d.aU,d.mU,Math.round(d.mC),Math.round(d.aC),Math.round(d.tC),fK(Math.round(d.edCost))+'/yr',d.pilotCost>0?fM(d.pilotCost):'$0'];
+    for(var j=0;j<cells.length;j++){var td=document.createElement('td');td.textContent=cells[j];tr.appendChild(td);}
+    tb.appendChild(tr);
+  }
+  var d15=calc(total,15);document.getElementById('ins_kids').textContent=Math.round(d15.tC);document.getElementById('ins_edcost').textContent=fK(Math.round(d15.edCost));
+  if(c1)c1.destroy();
+  c1=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:labels,datasets:[{label:'In market-rate housing',data:mA,backgroundColor:'#185FA5',borderRadius:4},{label:'In affordable housing',data:aA,backgroundColor:'#D85A30',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Expected school-age children',font:{size:12,weight:'400'},color:'#888',padding:{bottom:8}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11},color:'#888'}},y:{stacked:true,beginAtZero:true,grid:{color:'rgba(0,0,0,0.06)'},ticks:{font:{size:11},color:'#888',callback:function(v){return Math.round(v);}}}}}});
+  if(c2)c2.destroy();
+  c2=new Chart(document.getElementById('ch2'),{type:'bar',data:{labels:labels,datasets:[{label:'PILOT subsidy (NPV)',data:cA,backgroundColor:'#1D9E75',borderRadius:4},{label:'Annual education cost',data:eA,backgroundColor:'#BA7517',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'PILOT subsidy (NPV) vs. annual education cost',font:{size:12,weight:'400'},color:'#888',padding:{bottom:8}}},scales:{x:{grid:{display:false},ticks:{font:{size:11},color:'#888'}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.06)'},ticks:{font:{size:11},color:'#888',callback:function(v){return v>=1e6?'$'+(v/1e6).toFixed(0)+'M':v>0?'$'+(v/1e3).toFixed(0)+'K':'$0';}}}}}});
+}
+sT('high');sI('high');
+</script>
+</body>
+</html>
