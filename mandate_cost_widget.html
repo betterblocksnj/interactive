@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UHAC / IZO Mandate Cost Model — Better Blocks NJ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff;color:#111;padding:16px;max-width:860px;margin:0 auto}
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --color-text-primary:#111;
+  --color-text-secondary:#555;
+  --color-text-tertiary:#888;
+  --color-background-primary:#fff;
+  --color-background-secondary:#f5f5f5;
+  --color-border-tertiary:#e0e0e0;
+  --color-border-secondary:#ccc;
+  --border-radius-md:6px;
+  --border-radius-lg:10px;
+}
+.ew{padding:1rem 0;font-family:var(--font-sans)}
+.sec{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-tertiary);margin:0 0 10px}
+.sl-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.sl-row label{font-size:13px;color:var(--color-text-secondary);width:190px;flex-shrink:0}
+.sl-row input[type=range]{flex:1}
+.sl-val{font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:88px;text-align:right}
+.sl-note{font-size:11px;color:var(--color-text-tertiary);margin:-4px 0 10px;line-height:1.4;padding-left:202px}
+.aff-calc{border-radius:var(--border-radius-md);padding:8px 12px;margin-bottom:10px;font-size:12px;line-height:1.6}
+.aff-calc.exact{background:#EAF3DE;color:#27500A}
+.aff-calc.round-up{background:#E6F1FB;color:#0C447C}
+.aff-calc.trust-fund{background:#FAEEDA;color:#633806}
+.aff-calc.none{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.aff-calc strong{font-weight:500}
+.hr{border:none;border-top:.5px solid var(--color-border-tertiary);margin:18px 0}
+.mix-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:10px}
+.mix-panel{border-radius:var(--border-radius-lg);padding:14px;border:.5px solid var(--color-border-tertiary)}
+.mix-panel.market{border-color:#185FA5;background:#E6F1FB}
+.mix-panel.affordable{border-color:#534AB7;background:#EEEDFE}
+.mix-head{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px}
+.market .mix-head{color:#185FA5}.affordable .mix-head{color:#534AB7}
+.mix-sl{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mix-sl label{font-size:12px;color:var(--color-text-secondary);width:70px;flex-shrink:0}
+.mix-sl input[type=range]{flex:1}
+.mix-sl .mv{font-size:12px;font-weight:500;min-width:48px;text-align:right}
+.market .mix-sl .mv{color:#0C447C}.affordable .mix-sl .mv{color:#3C3489}
+.mix-disc{display:flex;align-items:center;gap:8px;margin-bottom:6px;opacity:.7}
+.mix-disc label{font-size:12px;color:var(--color-text-tertiary);width:70px;flex-shrink:0;font-style:italic}
+.mix-disc .mv{font-size:12px;font-weight:500;min-width:48px;text-align:right;color:#534AB7}
+.disc-bar{flex:1;height:6px;border-radius:3px;background:#fff;border:.5px solid #AFA9EC;overflow:hidden}
+.disc-fill{height:100%;background:#AFA9EC;transition:width .15s}
+.mix-ok{font-size:11px;color:#3B6D11;background:#EAF3DE;border-radius:4px;padding:4px 8px;margin-top:6px}
+.uhac-rules{font-size:11px;color:#3C3489;margin-top:8px;line-height:1.6;border-top:.5px solid #AFA9EC;padding-top:8px}
+.rent-table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.rent-table th{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-tertiary);padding:4px 8px;text-align:right;border-bottom:.5px solid var(--color-border-tertiary)}
+.rent-table th:first-child{text-align:left}
+.rent-table td{padding:5px 8px;text-align:right;border-bottom:.5px solid var(--color-border-tertiary)}
+.rent-table td:first-child{text-align:left;color:var(--color-text-secondary)}
+.rent-table tfoot td{font-weight:500;border-top:.5px solid var(--color-border-tertiary);border-bottom:none}
+.cost-bar{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 12px;font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;display:flex;gap:14px;flex-wrap:wrap;line-height:1.6}
+.cost-bar span{font-weight:500;color:var(--color-text-primary)}
+.berent{font-size:11px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:6px 10px;margin-bottom:10px;color:var(--color-text-secondary);line-height:1.5}
+.berent strong{color:var(--color-text-primary);font-weight:500}
+.tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.tbtn{padding:8px 6px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-tertiary);background:var(--color-background-primary);cursor:pointer;text-align:center}
+.tbtn .tn{font-size:12px;font-weight:500;color:var(--color-text-primary);display:block;margin-bottom:2px}
+.tbtn .tr2{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:1px}
+.tbtn .td{font-size:10px;color:var(--color-text-tertiary);display:block;line-height:1.3}
+.tbtn.active{border:2px solid #378ADD;background:#E6F1FB}
+.tbtn.active .tn,.tbtn.active .tr2{color:#185FA5}
+.roc-banner{border-radius:var(--border-radius-md);padding:10px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px}
+.roc-banner.above{background:#EAF3DE;border:.5px solid #97C459}
+.roc-banner.at{background:#E6F1FB;border:.5px solid #85B7EB}
+.roc-banner.below{background:#FCEBEB;border:.5px solid #F09595}
+.rb-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.rb-text{font-size:13px;line-height:1.5}
+.roc-banner.above .rb-text{color:#27500A}.roc-banner.at .rb-text{color:#0C447C}.roc-banner.below .rb-text{color:#791F1F}
+.rb-text strong{font-weight:500}
+.roc-sub{font-size:11px;margin-top:4px;opacity:.85}
+.tax-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.tbox{border-radius:var(--border-radius-lg);padding:14px}
+.tbox.cap{border:1.5px solid #185FA5;background:#E6F1FB}
+.tbox.rec{border:1.5px solid #3B6D11;background:#EAF3DE}
+.eye{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
+.cap .eye{color:#185FA5}.rec .eye{color:#3B6D11}
+.bign{font-size:30px;font-weight:500;line-height:1;margin:0 0 2px}
+.cap .bign{color:#0C447C}.rec .bign{color:#27500A}
+.tsub{font-size:12px;margin:0 0 8px}
+.cap .tsub{color:#185FA5}.rec .tsub{color:#3B6D11}
+.tdiv{border:none;border-top:.5px solid;margin:7px 0}
+.cap .tdiv{border-color:#85B7EB}.rec .tdiv{border-color:#97C459}
+.trow{display:flex;justify-content:space-between;font-size:12px;margin:3px 0}
+.cap .trow .tl{color:#185FA5}.cap .trow .tv{color:#0C447C;font-weight:500}
+.rec .trow .tl{color:#3B6D11}.rec .trow .tv{color:#27500A;font-weight:500}
+.tnt{font-size:11px;margin:6px 0 0;line-height:1.4}
+.cap .tnt{color:#185FA5}.rec .tnt{color:#3B6D11}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.opt{border-radius:var(--border-radius-lg);padding:12px;border:.5px solid var(--color-border-tertiary)}
+.oa{border-color:#854F0B}.ob{border-color:#185FA5}.oc{border:2px solid #534AB7;background:#EEEDFE}
+.opt h3{font-size:11px;font-weight:500;margin:0 0 5px}
+.oa h3{color:#854F0B}.ob h3{color:#185FA5}.oc h3{color:#3C3489}
+.opt .ov{font-size:15px;font-weight:500;margin:0 0 4px}
+.oa .ov{color:#633806}.ob .ov{color:#0C447C}.oc .ov{color:#26215C}
+.opt .os{font-size:11px;color:var(--color-text-secondary);margin:0 0 5px;line-height:1.4}
+.opt .od{font-size:10px;color:var(--color-text-tertiary);padding-top:6px;border-top:.5px solid var(--color-border-tertiary);line-height:1.4}
+.oc .od{border-color:#AFA9EC;color:#3C3489}
+.sbox{background:#EEEDFE;border-radius:var(--border-radius-lg);padding:14px;border:.5px solid #AFA9EC;margin-bottom:4px}
+.sbox.disabled{background:var(--color-background-secondary);border-color:var(--color-border-tertiary);opacity:.5;pointer-events:none}
+.st{font-size:12px;font-weight:500;color:#26215C;margin:0 0 3px}
+.ss{font-size:11px;color:#534AB7;margin:0 0 10px;line-height:1.4}
+.sbar{width:100%;height:26px;border-radius:4px;overflow:hidden;display:flex;margin:6px 0 10px}
+.sdets{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.sd{padding:10px 12px;border-radius:var(--border-radius-md)}
+.sda{background:#E6F1FB}.sdb{background:#FAEEDA;border:1.5px solid #EF9F27}
+.sdl{font-size:11px;margin:0 0 2px;font-weight:500}
+.sda .sdl{color:#185FA5}.sdb .sdl{color:#854F0B}
+.sdv{font-size:16px;font-weight:500;margin:0 0 2px;line-height:1.1}
+.sda .sdv{color:#0C447C}.sdb .sdv{color:#633806}
+.sds{font-size:11px;margin:0;line-height:1.4}
+.sda .sds{color:#185FA5}.sdb .sds{color:#854F0B}
+.more-tag{display:inline-block;font-size:9px;font-weight:600;background:#BA7517;color:#fff;padding:1px 5px;border-radius:2px;margin-left:4px;vertical-align:middle}
+.wp{font-size:12px;color:var(--color-text-secondary);margin:0;padding-top:8px;border-top:.5px solid #AFA9EC;line-height:1.6}
+.wp strong{color:var(--color-text-primary);font-weight:500}
+.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:3px;margin-top:3px}
+.ok{background:#EAF3DE;color:#3B6D11}.warn{background:#FAEEDA;color:#854F0B}
+.bad{background:#FCEBEB;color:#A32D2D}.info{background:#E6F1FB;color:#0C447C}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;border-radius:12px;background:var(--color-background-secondary);border:.5px solid var(--color-border-secondary);cursor:pointer;transition:background .2s}
+.toggle input:checked+.toggle-track{background:#378ADD;border-color:#378ADD}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;pointer-events:none}
+.toggle input:checked~.toggle-thumb{transform:translateX(20px)}
+.pilot-status{font-size:12px;padding:7px 11px;border-radius:var(--border-radius-md);margin-bottom:10px;line-height:1.5}
+.pilot-on{background:#E6F1FB;color:#0C447C}.pilot-off{background:#FAEEDA;color:#854F0B}
+.stat-note{font-size:11px;margin:3px 0 0;line-height:1.4;opacity:.8}
+.reset-btn{font-size:11px;color:#185FA5;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;margin-left:6px;font-family:inherit}
+.attribution{font-size:11px;color:#888;margin-top:24px;padding-top:12px;border-top:.5px solid #e0e0e0;line-height:1.6}
+.attribution a{color:#185FA5}
+@media(max-width:600px){
+  .mix-grid{grid-template-columns:1fr}
+  .tax-pair{grid-template-columns:1fr}
+  .opts{grid-template-columns:1fr}
+  .tier-grid{grid-template-columns:repeat(2,1fr)}
+  .sl-row label{width:140px}
+  .sl-note{padding-left:0}
+  .sdets{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="ew">
+
+<p class="sec">Building inputs</p>
+<div class="sl-row"><label>Total apartments</label><input type="range" id="sN" min="10" max="1500" step="1" value="100"><span class="sl-val" id="sNv">100 units</span></div>
+<div class="sl-row"><label>Affordable set-aside</label><input type="range" id="sSet" min="0" max="100" step="1" value="15"><span class="sl-val" id="sSetv">15%</span></div>
+<div id="affCalc"></div>
+<div class="sl-row">
+  <label>Hard cost / unit <button class="reset-btn" onclick="resetHC()">reset</button></label>
+  <input type="range" id="sHC" min="100000" max="800000" step="10000" value="300000">
+  <span class="sl-val" id="sHCv">$300K/unit</span>
+</div>
+<p class="sl-note" id="hcNote">Default for mid-rise.</p>
+<div class="sl-row">
+  <label>Land &amp; soft cost mult. <button class="reset-btn" onclick="resetLS()">reset</button></label>
+  <input type="range" id="sLS" min="1.10" max="1.70" step="0.05" value="1.45">
+  <span class="sl-val" id="sLSv">1.45×</span>
+</div>
+<p class="sl-note" id="lsNote">1.45× typical JC. Lower = cheaper land (redevelopment area).</p>
+<div id="costBar"></div>
+
+<div class="hr"></div>
+<p class="sec">Market rent tier — actual JC rents (2025)</p>
+<div class="tier-grid" id="tierGrid"></div>
+
+<div class="hr"></div>
+<p class="sec">Unit mix</p>
+<div class="mix-grid">
+  <div class="mix-panel market">
+    <p class="mix-head">Market-rate units — free to set</p>
+    <div class="mix-sl"><label>Studios</label><input type="range" id="mSt" min="0" max="100" step="5" value="15"><span class="mv" id="mStV">15%</span></div>
+    <div class="mix-sl"><label>1-bedrooms</label><input type="range" id="m1" min="0" max="100" step="5" value="50"><span class="mv" id="m1V">50%</span></div>
+    <div class="mix-sl"><label>2-bedrooms</label><input type="range" id="m2" min="0" max="100" step="5" value="25"><span class="mv" id="m2V">25%</span></div>
+    <div class="mix-sl"><label>3-bedrooms</label><input type="range" id="m3" min="0" max="100" step="5" value="10"><span class="mv" id="m3V">10%</span></div>
+    <div id="mktMixStatus"></div>
+  </div>
+  <div class="mix-panel affordable">
+    <p class="mix-head">Affordable units — UHAC N.J.A.C. 5:80-26.4</p>
+    <div class="mix-sl"><label>Studio/1BR <span style="font-size:9px;opacity:.7">≤20%</span></label><input type="range" id="aSt" min="0" max="20" step="5" value="20"><span class="mv" id="aStV">20%</span></div>
+    <div class="mix-sl"><label>2-bedrooms <span style="font-size:9px;opacity:.7">≥30%</span></label><input type="range" id="a2" min="30" max="80" step="5" value="60"><span class="mv" id="a2V">60%</span></div>
+    <div class="mix-sl"><label>3-bedrooms <span style="font-size:9px;opacity:.7">≥20%</span></label><input type="range" id="a3" min="20" max="70" step="5" value="20"><span class="mv" id="a3V">20%</span></div>
+    <div class="mix-disc">
+      <label>Discretionary</label>
+      <div class="disc-bar"><div class="disc-fill" id="discFill" style="width:0%"></div></div>
+      <span class="mv" id="discV">0%</span>
+    </div>
+    <div id="affMixStatus"></div>
+    <div class="uhac-rules">
+      Sliders enforce UHAC minimums (N.J.A.C. 5:80-26.4). The remaining % is at developer discretion.<br>
+      Income mix: 13% at 30% AMI · 37% at 50% AMI · 50% at 60% AMI → ~53% AMI avg
+    </div>
+  </div>
+</div>
+
+<div id="rentTable"></div>
+<div id="berentBar"></div>
+
+<div class="hr"></div>
+<div id="rocBanner"></div>
+<div id="taxPairWrap"></div>
+
+<div class="hr"></div>
+<p class="sec">Does this project get a PILOT?</p>
+<div class="toggle-row">
+  <label class="toggle"><input type="checkbox" id="tPilot" checked onchange="go()"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+  <label for="tPilot" style="font-size:13px;color:#111;cursor:pointer">Project receives a PILOT (tax exemption on improved building)</label>
+</div>
+<div id="pilotStatus"></div>
+<div class="opts" id="optsGrid"></div>
+
+<div class="sbox" id="sbox">
+  <p class="st">Adjust the PILOT rate</p>
+  <p class="ss" id="ssub"></p>
+  <div class="sl-row" style="margin-bottom:0">
+    <label style="font-size:12px;color:#3C3489;width:190px">PILOT rate (% of gross revenue)</label>
+    <input type="range" id="sPilot" min="0" max="15" step="0.5" value="10">
+    <span class="sl-val" id="sPilotV" style="color:#3C3489">10.0%</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:10px;color:#7F77DD;margin:2px 0 4px;padding:0 2px">
+    <span id="floorLabel">← 10% floor (mixed market-rate projects)</span>
+    <span>15% ceiling</span>
+  </div>
+  <div class="sbar" id="sbar"></div>
+  <div class="sdets" id="sdets"></div>
+  <p class="wp" id="wp"></p>
+</div>
+
+<div class="attribution">
+  Model by <a href="https://betterblocksnj.org" target="_blank">Better Blocks New Jersey</a>.
+  Sources: NW Financial independent audit of 177 Grand Street (Oct 2025) · UHAC N.J.A.C. 5:80-26.4 · N.J.S.A. 40A:20-12 · JC IZO Chapter 187 · HUD FY2025 JC-Newark MSA income limits · CBRE Q1 2025 cap rate data.
+  ROC targets calibrated to JC market (Class A cap rates ~4.75%). Model reflects stabilized initial return; does not include appreciation or IRR over hold period.
+</div>
+
+</div>
+<script>
+const HUD2025={1:79800,2:91200,3:102550,4:115450,5:124700,6:133950};
+const HH_SIZE={st:1,br1:2,br2:3,br3:5};
+const TIERS=[
+  {id:0,name:'Workforce',cls:'B−',st:1900,br1:2400,br2:3000,br3:3600},
+  {id:1,name:'Mid-market',cls:'B',st:2600,br1:3200,br2:4100,br3:5000},
+  {id:2,name:'Premium',cls:'A',st:3200,br1:4000,br2:5200,br3:6200},
+  {id:3,name:'Luxury',cls:'A+',st:4000,br1:5000,br2:6500,br3:7800},
+];
+const REGIMES=[
+  [0,  230000,0.055,'Small / boutique','Wood-frame, 4–5 stories'],
+  [31, 255000,0.055,'Low-rise','Wood-frame or light steel, 5–7 stories'],
+  [81, 300000,0.055,'Mid-rise','Concrete podium, 8–15 stories'],
+  [201,340000,0.057,'Large mid-rise','Concrete/steel, 15–25 stories'],
+  [401,420000,0.060,'High-rise','Steel/concrete tower, 25–40 stories'],
+  [801,500000,0.063,'Mega-tower','Full tower, 40+ stories'],
+];
+const DEFAULT_LS=1.45,VAC=0.05,OPEX=0.20;
+const fmt$=n=>'$'+Math.round(n).toLocaleString();
+const fmtM=n=>n>=1e6?'$'+(n/1e6).toFixed(2)+'M':'$'+Math.round(n/1e3).toLocaleString()+'K';
+const fmtK=n=>'$'+Math.round(n/1000)+'K';
+const fmtP=(n,d=1)=>(n*100).toFixed(d)+'%';
+const gv=id=>parseFloat(document.getElementById(id).value)||0;
+const gc=id=>document.getElementById(id).checked;
+function getRegime(N){let r=REGIMES[0];for(const x of REGIMES){if(N>=x[0])r=x;else break;}return r;}
+function uhacRent(br,pct){return HUD2025[HH_SIZE[br]]*pct*0.30/12;}
+function blendedUHAC(br){return uhacRent(br,0.30)*0.13+uhacRent(br,0.50)*0.37+uhacRent(br,0.60)*0.50;}
+function calcAffUnits(N,setPct){
+  if(setPct===0)return{affN:0,mktN:N,exact:0,frac:0,status:'none',payment:0};
+  if(setPct>=1)return{affN:N,mktN:0,exact:N,frac:0,status:'exact',payment:0};
+  const exact=N*setPct,whole=Math.floor(exact),frac=exact-whole;
+  if(frac<0.001)return{affN:whole,mktN:N-whole,exact,frac:0,status:'exact',payment:0};
+  if(frac>=0.5)return{affN:whole+1,mktN:N-whole-1,exact,frac,status:'round_up',payment:0};
+  return{affN:whole,mktN:N-whole,exact,frac,status:'trust_fund',payment:Math.max(36000,180000*frac)};
+}
+function rocFn(G,pr,hasPilot,convTax,totalCost){
+  const tax=hasPilot?pr*G:convTax;
+  return{ROC:(G*(1-VAC)*(1-OPEX)-tax)/totalCost,tax};
+}
+function reqRentCalc(tNOI,affGPR,mktN,pr,hasPilot,convTax){
+  const A=(1-VAC)*(1-OPEX);
+  const T=hasPilot?(tNOI/(A-pr)):((tNOI+convTax)/A);
+  if(!isFinite(T)||T<0||!mktN)return null;
+  return(T-affGPR)/mktN/12;
+}
+let sel=1,userHC=null,userLS=null;
+function resetHC(){userHC=null;const[,hc]=getRegime(gv('sN'));document.getElementById('sHC').value=hc;go();}
+function resetLS(){userLS=null;document.getElementById('sLS').value=DEFAULT_LS;go();}
+function renderTiers(){
+  document.getElementById('tierGrid').innerHTML=TIERS.map(t=>`
+    <button class="tbtn${t.id===sel?' active':''}" onclick="sel=${t.id};renderTiers();go()">
+      <span class="tn">${t.name} <span style="font-size:9px;opacity:.6">${t.cls}</span></span>
+      <span class="tr2">${fmt$(t.br1)}/mo 1BR · ${fmt$(t.br2)}/mo 2BR</span>
+      <span class="td">${['Older stock','New construction median','Paulus Hook, Hamilton Park','Exchange Place, Newport'][t.id]}</span>
+    </button>`).join('');
+}
+renderTiers();
+document.getElementById('sN').addEventListener('input',function(){
+  if(userHC===null){const[,hc]=getRegime(parseInt(this.value));document.getElementById('sHC').value=hc;}
+  go();
+});
+['sSet','sHC','sLS','sPilot'].forEach(id=>document.getElementById(id).addEventListener('input',function(){
+  if(id==='sHC')userHC=parseFloat(this.value);
+  if(id==='sLS')userLS=parseFloat(this.value);
+  go();
+}));
+['mSt','m1','m2','m3','aSt','a2','a3'].forEach(id=>document.getElementById(id).addEventListener('input',go));
+function getAffMix(){
+  const st=Math.min(gv('aSt'),20);
+  const a2=Math.max(gv('a2'),30);
+  const a3=Math.max(gv('a3'),20);
+  const disc=Math.max(0,100-st-a2-a3);
+  return{st,a2,a3,disc,a2forCalc:a2+disc};
+}
+function go(){
+  const N=gv('sN'),sp=gv('sSet')/100,hasPilot=gc('tPilot'),rr=gv('sPilot')/100;
+  const t=TIERS[sel];
+  document.getElementById('sNv').textContent=N.toLocaleString()+' units';
+  document.getElementById('sSetv').textContent=sp===0?'No mandate':sp>=1?'100% affordable':Math.round(sp*100)+'%';
+  document.getElementById('sPilotV').textContent=(rr*100).toFixed(1)+'%';
+  const{affN,mktN,exact,frac,status,payment}=calcAffUnits(N,sp);
+  const isZero=sp===0,is100=sp>=1;
+  let calcHtml='';
+  if(isZero){calcHtml=`<div class="aff-calc none">No affordable mandate — all ${N} units are market-rate.</div>`;}
+  else if(status==='exact'){calcHtml=`<div class="aff-calc exact"><strong>${affN} affordable units</strong> (${N} × ${Math.round(sp*100)}% = ${exact.toFixed(2)} — exact whole number) · ${mktN} market-rate units.</div>`;}
+  else if(status==='round_up'){calcHtml=`<div class="aff-calc round-up"><strong>${affN} affordable units required</strong> (${N} × ${Math.round(sp*100)}% = ${exact.toFixed(2)} → fraction ${frac.toFixed(2)} ≥ 0.5, <strong>rounded up</strong> per JC IZO Ch. 187) · ${mktN} market-rate units. No trust fund payment.</div>`;}
+  else{calcHtml=`<div class="aff-calc trust-fund"><strong>${affN} affordable units required</strong> (${N} × ${Math.round(sp*100)}% = ${exact.toFixed(2)} → fraction ${frac.toFixed(2)} &lt; 0.5, rounded down) · ${mktN} market-rate units.<br>⚠️ <strong>Trust fund payment required: ${fmt$(payment)}</strong> (pro-rata $180K/unit, min $36K per JC IZO Ch. 187 → Jersey City Affordable Housing Trust Fund).</div>`;}
+  document.getElementById('affCalc').innerHTML=calcHtml;
+  const[,defaultHC,tgtROC,bname]=getRegime(N);
+  const hc=userHC!==null?userHC:defaultHC;
+  const ls=userLS!==null?userLS:DEFAULT_LS;
+  const isDefHC=userHC===null||Math.abs(hc-defaultHC)<5000;
+  const isDefLS=userLS===null||Math.abs(ls-DEFAULT_LS)<0.03;
+  document.getElementById('sHCv').textContent=fmtK(hc)+'/unit';
+  document.getElementById('sLSv').textContent=ls.toFixed(2)+'×';
+  document.getElementById('hcNote').textContent=isDefHC?`Default for ${bname.toLowerCase()}.`:`${hc>defaultHC?'+':''}${fmtK(hc-defaultHC)} vs. default.`;
+  document.getElementById('lsNote').textContent=isDefLS?'1.45× typical JC. Lower = cheaper land.':ls<DEFAULT_LS?`${ls.toFixed(2)}× — cheaper land (~${fmtK((ls-1)*hc)}/unit land+soft).`:`${ls.toFixed(2)}× — expensive site.`;
+  const totalCost=hc*ls*N,convTax=totalCost*0.018,tNOI=totalCost*tgtROC;
+  document.getElementById('costBar').innerHTML=`<div class="cost-bar">Type: <span>${bname}</span> · Hard cost: <span>${fmtK(hc)}/unit${isDefHC?'':' ✎'}</span> · Land+soft: <span>${fmtK(Math.round((ls-1)*hc))}/unit${isDefLS?'':' ✎'}</span> · Total: <span>${fmtM(totalCost)}</span> · Conv. tax: <span>${fmtM(convTax)}/yr</span> · Target ROC: <span>${fmtP(tgtROC,1)}</span></div>`;
+  const raw=[gv('mSt'),gv('m1'),gv('m2'),gv('m3')];
+  const tot=raw.reduce((a,b)=>a+b,0)||100;
+  const[mPSt,mP1,mP2,mP3]=raw.map(v=>v/tot*100);
+  document.getElementById('mStV').textContent=Math.round(mPSt)+'%';
+  document.getElementById('m1V').textContent=Math.round(mP1)+'%';
+  document.getElementById('m2V').textContent=Math.round(mP2)+'%';
+  document.getElementById('m3V').textContent=Math.round(mP3)+'%';
+  document.getElementById('mktMixStatus').innerHTML=`<div class="mix-ok">Mix: ${Math.round(mPSt)}% studio · ${Math.round(mP1)}% 1BR · ${Math.round(mP2)}% 2BR · ${Math.round(mP3)}% 3BR = 100%</div>`;
+  const{st:aPSt,a2:aP2,a3:aP3,disc,a2forCalc}=getAffMix();
+  document.getElementById('aStV').textContent=aPSt+'%';
+  document.getElementById('a2V').textContent=aP2+'%';
+  document.getElementById('a3V').textContent=aP3+'%';
+  document.getElementById('discV').textContent=disc+'%';
+  document.getElementById('discFill').style.width=disc+'%';
+  document.getElementById('affMixStatus').innerHTML=`<div class="mix-ok">${aPSt}% studio/1BR · ${aP2}% 2BR · ${aP3}% 3BR${disc>0?` · ${disc}% developer discretion`:' — fully specified'} = 100%</div>`;
+  const affBlend=(aPSt/100*0.5)*blendedUHAC('st')+(aPSt/100*0.5)*blendedUHAC('br1')+a2forCalc/100*blendedUHAC('br2')+aP3/100*blendedUHAC('br3');
+  const affGPR=affN*affBlend*12;
+  const mktBlend=mPSt/100*t.st+mP1/100*t.br1+mP2/100*t.br2+mP3/100*t.br3;
+  const mktGPR=mktN*mktBlend*12;
+  const totalGPR=mktGPR+affGPR;
+  const mktRentForAffMix=(aPSt/100*0.5)*t.st+(aPSt/100*0.5)*t.br1+a2forCalc/100*t.br2+aP3/100*t.br3;
+  const totalGap=isZero?0:affN*(mktRentForAffMix-affBlend)*12;
+  const pctDev=totalCost>0&&!isZero?totalGap/totalCost:0;
+  const pctRev=totalGPR>0&&mktN>0&&!isZero?totalGap/(N*mktBlend*12):0;
+  const brTypes=[{key:'st',lbl:'Studio'},{key:'br1',lbl:'1-bedroom'},{key:'br2',lbl:'2-bedroom'},{key:'br3',lbl:'3-bedroom'}];
+  const mPcts={st:mPSt,br1:mP1,br2:mP2,br3:mP3};
+  const aPcts={st:aPSt/2,br1:aPSt/2,br2:aP2,br3:aP3};
+  let tblRows='',totMktAnn=0,totAffAnn=0,totMktU=0,totAffU=0;
+  for(const{key,lbl}of brTypes){
+    const mU=Math.round(mktN*mPcts[key]/100),aU=Math.round(affN*aPcts[key]/100);
+    const mR=t[key],aR=blendedUHAC(key);
+    totMktAnn+=mU*mR*12;totAffAnn+=aU*aR*12;totMktU+=mU;totAffU+=aU;
+    tblRows+=`<tr><td>${lbl}</td><td>${mU} u · ${fmt$(mR)}/mo</td><td>${aU>0?aU+' u · '+fmt$(Math.round(aR))+'/mo':'—'}</td><td style="color:#A32D2D">${aU>0?fmt$(Math.round(mR-aR))+'/mo':''}</td></tr>`;
+  }
+  if(!isZero&&disc>0){const discU=affN-totAffU;tblRows+=`<tr style="opacity:.65;font-style:italic"><td>Discretionary (${disc}% at dev. choice)</td><td>—</td><td>${discU>0?'~'+discU+' u · varies':disc+'% of aff. units'}</td><td style="color:#A32D2D">varies</td></tr>`;}
+  document.getElementById('rentTable').innerHTML=isZero?`<p style="font-size:12px;color:#888;margin:0 0 10px">No affordable units — all ${N} units at market rates.</p>`:`
+    <table class="rent-table">
+      <thead><tr><th style="text-align:left">Bedroom type</th><th>Market-rate</th><th>Affordable (UHAC 53% AMI)</th><th>Gap/unit/mo</th></tr></thead>
+      <tbody>${tblRows}</tbody>
+      <tfoot><tr><td>Total</td><td>${totMktU} u · ${fmtM(totMktAnn)}/yr</td><td>${affN} u · ${fmtM(totalGap+totAffAnn)}/yr market equiv.${status==='trust_fund'?` + ${fmt$(payment)} AHTF`:''}${status==='round_up'?' (incl. rounded-up unit)':''}</td><td style="color:#A32D2D">${isZero?'':fmtM(totalGap)+'/yr gap'}</td></tr></tfoot>
+    </table>`;
+  const A=(1-VAC)*(1-OPEX);
+  const bkRent=totalCost>0&&N>0?(totalCost*tgtROC+convTax)/(A*N*12):0;
+  const aboveBK=mktBlend>=bkRent;
+  document.getElementById('berentBar').innerHTML=`<div class="berent">Break-even blended rent (no mandate, no PILOT): <strong>${fmt$(Math.round(bkRent))}/mo</strong> avg. Current blended market rent: <strong>${fmt$(Math.round(mktBlend))}/mo</strong>. ${aboveBK?`Above break-even by ${fmt$(Math.round(mktBlend-bkRent))}/mo.`:`Below break-even by ${fmt$(Math.round(bkRent-mktBlend))}/mo — PILOT needed before mandate.`}</div>`;
+  const PF=is100?0:.10,PC=.15;
+  const pr=hasPilot?Math.max(PF,Math.min(rr,PC)):0;
+  document.getElementById('sPilot').min=is100?'0':'10';
+  document.getElementById('floorLabel').textContent=is100?'← 0% allowed for 100% affordable':'← 10% floor (mixed projects, N.J.S.A. 40A:20-12)';
+  const rC=rocFn(totalGPR,pr,hasPilot,convTax,totalCost);
+  const rNP=rocFn(totalGPR,0,false,convTax,totalCost);
+  const rPF=rocFn(totalGPR,PF,true,convTax,totalCost);
+  const rBase=rocFn(N*mktBlend*12,0,false,convTax,totalCost);
+  const aROC=rC.ROC,gp=aROC-tgtROC;
+  const st2=gp>=0?'above':gp>=-tgtROC*.15?'at':'below';
+  const mandateCaused=rBase.ROC>=tgtROC&&aROC<tgtROC;
+  const rqB=(!isZero&&!is100&&mktN)?reqRentCalc(tNOI,affGPR,mktN,pr,hasPilot,convTax):null;
+  const premC=rqB?Math.max(0,rqB-mktBlend):0,premCp=mktBlend?premC/mktBlend:0;
+  const arrow=st2==='above'?'↑':st2==='at'?'→':'↓';
+  const pd=hasPilot?` with ${fmtP(pr)} PILOT`:' without a PILOT';
+  const tfNote=status==='trust_fund'?` Developer also owes <strong>${fmt$(payment)}</strong> to the JC Affordable Housing Trust Fund.`:'';
+  let bb='',bs='';
+  if(isZero){bb=`<strong>${aROC>=tgtROC?'Feasible':'Below target'} baseline — ${fmtP(aROC,2)} ROC</strong>${pd}. All ${N} units at ${t.name.toLowerCase()} rents (blended ${fmt$(Math.round(mktBlend))}/mo).`;bs=aROC<tgtROC?`<div class="roc-sub">${fmt$(Math.round(mktBlend))}/mo is ${fmt$(Math.round(bkRent-mktBlend))}/mo below break-even. Try a higher tier, lower costs, or a PILOT.</div>`:`<div class="roc-sub">Break-even: ${fmt$(Math.round(bkRent))}/mo. Slide set-aside above 0% to see mandate effects.</div>`;}
+  else if(is100){bb=`<strong>100% affordable — ${fmtP(aROC,2)} ROC vs. ${fmtP(tgtROC,1)} target</strong>${pd}.`;bs=`<div class="roc-sub">Blended restricted rent: ${fmt$(Math.round(affBlend))}/mo. Viability depends on PILOT + other subsidies (LIHTC, HOME).</div>`;}
+  else if(st2==='above'){bb=`<strong>Above target ROC — ${fmtP(aROC,2)} vs. ${fmtP(tgtROC,1)} target</strong>${pd}. Viable at ${t.name.toLowerCase()} rents.`;bs=`<div class="roc-sub">No-mandate baseline: ${fmtP(rBase.ROC,2)}. Mandate reduced ROC by ${fmtP(rBase.ROC-aROC,2)}${hasPilot?' — partially offset by the PILOT':''}.${tfNote}</div>`;}
+  else if(st2==='at'){bb=`<strong>Near target ROC — ${fmtP(aROC,2)} vs. ${fmtP(tgtROC,1)} target</strong>${pd}. Marginal.`;bs=premC>0?`<div class="roc-sub">To hit target: blended rent needs +${fmt$(Math.round(premC))}/mo (${fmt$(Math.round(rqB||mktBlend))}/mo avg).${tfNote}</div>`:'`';}
+  else{bb=mandateCaused?`<strong>Below target ROC — ${fmtP(aROC,2)} vs. ${fmtP(tgtROC,1)} target</strong>${pd}. <strong>The mandate causes this shortfall</strong> — without it this building achieves ${fmtP(rBase.ROC,2)}.`:`<strong>Below target ROC — ${fmtP(aROC,2)} vs. ${fmtP(tgtROC,1)} target</strong>${pd}. <strong>A PILOT is needed even before any mandate</strong> — conventional taxation produces only ${fmtP(rBase.ROC,2)}.`;bs=premC>0?`<div class="roc-sub">To restore: blended rent needs +${fmt$(Math.round(premC))}/mo (${fmt$(Math.round(rqB||mktBlend))}/mo avg).${tfNote}</div>`:'`';}
+  document.getElementById('rocBanner').innerHTML=`<div class="roc-banner ${isZero?(aROC>=tgtROC?'above':'below'):st2}"><div class="rb-icon">${arrow}</div><div class="rb-text">${bb}${bs}</div></div>`;
+  document.getElementById('taxPairWrap').innerHTML=`<div class="tax-pair"><div class="tbox cap"><p class="eye">Capital burden — % of development cost</p><p class="bign">${isZero?'—':fmtP(pctDev,2)}</p><p class="tsub">${isZero?'No mandate':'of '+fmtM(totalCost)+' total cost'}</p><hr class="tdiv"><div class="trow"><span class="tl">Annual revenue gap</span><span class="tv">${isZero?'$0':fmtM(totalGap)}</span></div><div class="trow"><span class="tl">Development cost</span><span class="tv">${fmtM(totalCost)}</span></div><p class="tnt">Like an impact fee — the mandate's annual revenue cost as a share of total construction cost.</p></div><div class="tbox rec"><p class="eye">Recurring drag — % of gross revenue</p><p class="bign">${isZero||!mktN?'—':fmtP(pctRev,1)}</p><p class="tsub">${isZero?'No mandate':is100?'100% affordable — no market base':'of annual gross rental income'}</p><hr class="tdiv"><div class="trow"><span class="tl">Annual revenue gap</span><span class="tv">${isZero?'$0':fmtM(totalGap)}</span></div><div class="trow"><span class="tl">Annual gross revenue</span><span class="tv">${fmtM(totalGPR)}</span></div><p class="tnt">The Gyourko / Furman Center measure — permanently consumed every year.</p></div></div>`;
+  const p15=PC*totalGPR,pvc=p15>convTax?'exceeds':p15<convTax?'is less than':'equals';
+  document.getElementById('pilotStatus').innerHTML=hasPilot?`<div class="pilot-status pilot-on">PILOT active — developer pays ${fmtP(pr)} of gross revenue instead of ${fmtM(convTax)}/yr conventional tax. At current rents, 15% of gross (${fmtM(p15)}/yr) ${pvc} conventional taxation.<div class="stat-note">N.J.S.A. 40A:20-12: ${is100?'100% affordable may go below 10% — HMFA recommends ~6.28%.':'Mixed projects: 10–15% of annual gross revenue.'}</div></div>`:`<div class="pilot-status pilot-off">No PILOT — developer pays full conventional property tax of ${fmtM(convTax)}/yr.<div class="stat-note">Municipalities are not required to grant PILOTs, even for projects with affordable set-asides.</div></div>`;
+  const bBadge=r=>r>=tgtROC?`<span class="badge ok">ROC ${fmtP(r,2)} — above ${fmtP(tgtROC,1)} target</span>`:r>=tgtROC*.85?`<span class="badge warn">ROC ${fmtP(r,2)} — near target</span>`:`<span class="badge bad">ROC ${fmtP(r,2)} — below target</span>`;
+  if(isZero){document.getElementById('optsGrid').innerHTML=`<div class="opt" style="grid-column:1/-1;border-color:#e0e0e0"><h3 style="color:#111">No mandate — baseline</h3><p class="os" style="color:#555">No-PILOT: <strong>${fmtP(rBase.ROC,2)}</strong> ${bBadge(rBase.ROC)} &nbsp; 10% PILOT: <strong>${fmtP(rocFn(N*mktBlend*12,PF,true,convTax,totalCost).ROC,2)}</strong> ${bBadge(rocFn(N*mktBlend*12,PF,true,convTax,totalCost).ROC)}<br><br>Slide set-aside above 0% to see mandate effects.</p></div>`;}
+  else if(is100){document.getElementById('optsGrid').innerHTML=`<div class="opt oc" style="grid-column:1/-1"><h3>100% affordable (53% AMI)</h3><p class="ov">${fmtP(aROC,2)} ROC</p><p class="os">Blended restricted rent: ${fmt$(Math.round(affBlend))}/mo. HMFA recommends ~6.28% PILOT. 10% floor does not apply (N.J.S.A. 40A:20-12).</p></div>`;}
+  else{
+    const rqNP=reqRentCalc(tNOI,affGPR,mktN,0,false,convTax);
+    const rqPF=reqRentCalc(tNOI,affGPR,mktN,PF,true,convTax);
+    const pNP=rqNP?Math.max(0,rqNP-mktBlend):0;
+    const pPF=rqPF?Math.max(0,rqPF-mktBlend):0;
+    document.getElementById('optsGrid').innerHTML=`<div class="opt oa"><h3>Option A — No PILOT</h3><p class="ov">${fmt$(Math.round(mktBlend))}/mo avg</p><p class="os">ROC: <strong>${fmtP(rNP.ROC,2)}</strong>. Full ${fmtM(convTax)}/yr tax. ${pNP>0?`Rents need +${fmt$(Math.round(pNP))}/mo to hit target.`:'Market rents cover target.'}</p>${bBadge(rNP.ROC)}<p class="od">Full mandate cost on market tenants.</p></div><div class="opt ob"><h3>Option B — 10% PILOT</h3><p class="ov">${fmt$(Math.round(mktBlend))}/mo avg</p><p class="os">ROC: <strong>${fmtP(rPF.ROC,2)}</strong>. City foregoes ${fmtM(convTax-rPF.tax)}/yr. ${pPF>0?`Rents need +${fmt$(Math.round(pPF))}/mo to hit target.`:'Market rents cover target.'}</p>${bBadge(rPF.ROC)}<p class="od">Most generous PILOT for mixed projects. Floor per N.J.S.A. 40A:20-12.</p></div><div class="opt oc"><h3>Option C — Negotiated 10–15%</h3><p class="ov">${fmt$(Math.round(mktBlend))}/mo avg</p><p class="os">ROC: <strong>${fmtP(aROC,2)}</strong> at ${fmtP(pr)} PILOT. ${premC>0?`Rents need +${fmt$(Math.round(premC))}/mo to hit target.`:'Market rents cover target.'} Adjust below.</p>${bBadge(aROC)}<p class="od">Lower rate = larger exemption = smaller required rent premium.</p></div>`;
+  }
+  document.getElementById('sbox').className=hasPilot&&!isZero?'sbox':'sbox disabled';
+  document.getElementById('ssub').textContent=hasPilot?(is100?'100% affordable — may go below 10%. HMFA recommends ~6.28%.':isZero?'Set set-aside above 0% to activate.':'10–15% for mixed projects.'):'Toggle PILOT switch above to enable.';
+  if(!hasPilot||isZero){document.getElementById('sbar').innerHTML='';document.getElementById('sdets').innerHTML='';document.getElementById('wp').innerHTML=isZero?'Set set-aside above 0% to activate.':'Enable PILOT toggle above.';return;}
+  const ex=convTax-rC.tax,exF=convTax>0?Math.min(1,Math.max(0,ex/convTax)):0;
+  const exP=Math.round(exF*100),prP=100-exP;
+  document.getElementById('sbar').innerHTML=`<div style="width:${exP}%;background:#378ADD;height:100%;display:flex;align-items:center;justify-content:center;transition:width .15s;min-width:0">${exP>14?`<span style="font-size:11px;font-weight:500;color:#042C53">${exP}% city exemption</span>`:''}</div><div style="flex:1;background:#EF9F27;height:100%;display:flex;align-items:center;justify-content:center;transition:width .15s;min-width:0">${prP>14?`<span style="font-size:11px;font-weight:500;color:#412402">${prP}% rent premium burden</span>`:''}</div>`;
+  const pb=pr<=PF+.001?`<span class="badge ok">${is100?'Full exemption':'At 10% floor'}</span>`:pr>=PC-.001?`<span class="badge warn">At 15% ceiling</span>`:`<span class="badge info">Within statutory range</span>`;
+  const vc=rC.tax>convTax?`PILOT payment (${fmtM(rC.tax)}/yr) exceeds conventional tax (${fmtM(convTax)}/yr).`:`PILOT payment (${fmtM(rC.tax)}/yr) &lt; conventional tax (${fmtM(convTax)}/yr) — real city exemption.`;
+  document.getElementById('sdets').innerHTML=is100?`<div class="sd sda" style="grid-column:1/-1"><p class="sdl">City's contribution</p><p class="sdv">${fmtM(ex)}/yr</p><p class="sds">Developer pays ${fmtP(pr)} = ${fmtM(rC.tax)}/yr vs. ${fmtM(convTax)}/yr · ROC: <strong>${fmtP(aROC,2)}</strong> vs. ${fmtP(tgtROC,1)} · ${pb}</p></div>`:`<div class="sd sda"><p class="sdl">City's contribution</p><p class="sdv">${fmtM(ex)}/yr</p><p class="sds">Foregone conventional property tax<br>Developer pays ${fmtP(pr)} = ${fmtM(rC.tax)}/yr vs. ${fmtM(convTax)}/yr<br>${pb}</p></div><div class="sd sdb"><p class="sdl">Market-rate tenants' contribution <span class="more-tag">MORE per unit</span></p><p class="sdv">${premC>0?fmt$(Math.round(premC))+'/mo above market avg':'No premium above market'}</p><p class="sds">${premC>0?`Blended market rent: ${fmt$(Math.round(mktBlend))}/mo<br>Required: <strong>${fmt$(Math.round(rqB||mktBlend))}/mo</strong><br>Each market-rate tenant subsidizes affordable units (${fmtP(premCp)} above market)`:` At ${fmtP(pr)} PILOT, market rents cover the target — no surcharge.`}</p></div>`;
+  document.getElementById('wp').innerHTML=is100?`At <strong>${fmtP(pr)} PILOT</strong>, developer pays <strong>${fmtM(rC.tax)}/yr</strong> vs. <strong>${fmtM(convTax)}/yr</strong>. ${vc} ROC: <strong>${fmtP(aROC,2)}</strong> vs. ${fmtP(tgtROC,1)} target.`:`At <strong>${fmtP(pr)} PILOT</strong>, developer pays <strong>${fmtM(rC.tax)}/yr</strong> instead of <strong>${fmtM(convTax)}/yr</strong> — city foregoes <strong>${fmtM(ex)}/yr</strong>. ROC: <strong>${fmtP(aROC,2)}</strong> vs. <strong>${fmtP(tgtROC,1)} target</strong>. ${premC>0?`Blended rents need +<strong>${fmt$(Math.round(premC))}/mo</strong> to reach target (${fmt$(Math.round(rqB||mktBlend))}/mo avg).`:''} ${vc}${tfNote}${st2==='below'?` <strong>At ${t.name.toLowerCase()} rents this project will not get built without a lower PILOT, higher rents, or lower costs.</strong>`:''}`;
+}
+document.getElementById('sHC').value=getRegime(gv('sN'))[1];
+document.getElementById('sLS').value=DEFAULT_LS;
+go();
+</script>
+</body>
+</html>
