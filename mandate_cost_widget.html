@@ -146,6 +146,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .sl-note{padding-left:0}
   .sdets{grid-template-columns:1fr}
 }
+
+.land-section{margin-top:0}
+.land-toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.land-box{border-radius:var(--border-radius-lg);padding:14px;border:1.5px solid #3B6D11;background:#EAF3DE;margin-bottom:10px}
+.land-box.impossible{border-color:#A32D2D;background:#FCEBEB}
+.land-box.partial{border-color:#854F0B;background:#FAEEDA}
+.land-lbl{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:#3B6D11;margin:0 0 10px}
+.land-box.impossible .land-lbl{color:#A32D2D}
+.land-box.partial .land-lbl{color:#854F0B}
+.land-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.land-cell{background:rgba(255,255,255,.55);border-radius:6px;padding:8px 10px}
+.land-cell .lc-lbl{font-size:10px;color:#3B6D11;font-weight:500;margin:0 0 2px}
+.land-box.impossible .land-cell .lc-lbl{color:#A32D2D}
+.land-box.partial .land-cell .lc-lbl{color:#854F0B}
+.land-cell .lc-val{font-size:18px;font-weight:500;color:#173404;line-height:1;margin:0 0 1px}
+.land-box.impossible .land-cell .lc-val{color:#501313}
+.land-box.partial .land-cell .lc-val{color:#412402}
+.land-cell .lc-sub{font-size:10px;color:#3B6D11}
+.land-box.impossible .land-cell .lc-sub{color:#A32D2D}
+.land-box.partial .land-cell .lc-sub{color:#854F0B}
+.land-note{font-size:12px;color:#27500A;line-height:1.6;border-top:.5px solid #97C459;padding-top:8px;margin-top:4px}
+.land-box.impossible .land-note{color:#791F1F;border-top-color:#F09595}
+.land-box.partial .land-note{color:#633806;border-top-color:#EF9F27}
+.land-note strong{font-weight:500}
 </style>
 </head>
 <body>
@@ -235,6 +259,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <p class="wp" id="wp"></p>
 </div>
 
+
+<div class="hr"></div>
+<p class="sec">Land price adjustment</p>
+<div class="land-toggle-row">
+  <label class="toggle"><input type="checkbox" id="tLand" onchange="go()"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+  <label for="tLand" style="font-size:13px;color:#111;cursor:pointer">Show required land price adjustment to restore feasibility</label>
+</div>
+<div id="landBox" style="display:none"></div>
+
 <div class="attribution">
   Model by <a href="https://betterblocksnj.org" target="_blank">Better Blocks New Jersey</a>.
   Sources: NW Financial independent audit of 177 Grand Street (Oct 2025) · UHAC N.J.A.C. 5:80-26.4 · N.J.S.A. 40A:20-12 · JC IZO Chapter 187 · HUD FY2025 JC-Newark MSA income limits · CBRE Q1 2025 cap rate data.
@@ -315,6 +348,19 @@ function getAffMix(){
   const a3=Math.max(gv('a3'),20);
   const disc=Math.max(0,100-st-a2-a3);
   return{st,a2,a3,disc,a2forCalc:a2+disc};
+}
+
+function reqLS(GPR, hc, N, tgtROC, pr, hasPilot) {
+  const A = (1-VAC)*(1-OPEX);
+  if (hasPilot) {
+    const denom = hc * N * tgtROC;
+    if (denom <= 0) return null;
+    return GPR * (A - pr) / denom;
+  } else {
+    const denom = hc * N * (tgtROC + 0.018);
+    if (denom <= 0) return null;
+    return GPR * A / denom;
+  }
 }
 function go(){
   const N=gv('sN'),sp=gv('sSet')/100,hasPilot=gc('tPilot'),rr=gv('sPilot')/100;
@@ -432,6 +478,56 @@ function go(){
   const vc=rC.tax>convTax?`PILOT payment (${fmtM(rC.tax)}/yr) exceeds conventional tax (${fmtM(convTax)}/yr).`:`PILOT payment (${fmtM(rC.tax)}/yr) &lt; conventional tax (${fmtM(convTax)}/yr) — real city exemption.`;
   document.getElementById('sdets').innerHTML=is100?`<div class="sd sda" style="grid-column:1/-1"><p class="sdl">City's contribution</p><p class="sdv">${fmtM(ex)}/yr</p><p class="sds">Developer pays ${fmtP(pr)} = ${fmtM(rC.tax)}/yr vs. ${fmtM(convTax)}/yr · ROC: <strong>${fmtP(aROC,2)}</strong> vs. ${fmtP(tgtROC,1)} · ${pb}</p></div>`:`<div class="sd sda"><p class="sdl">City's contribution</p><p class="sdv">${fmtM(ex)}/yr</p><p class="sds">Foregone conventional property tax<br>Developer pays ${fmtP(pr)} = ${fmtM(rC.tax)}/yr vs. ${fmtM(convTax)}/yr<br>${pb}</p></div><div class="sd sdb"><p class="sdl">Market-rate tenants' contribution <span class="more-tag">MORE per unit</span></p><p class="sdv">${premC>0?fmt$(Math.round(premC))+'/mo above market avg':'No premium above market'}</p><p class="sds">${premC>0?`Blended market rent: ${fmt$(Math.round(mktBlend))}/mo<br>Required: <strong>${fmt$(Math.round(rqB||mktBlend))}/mo</strong><br>Each market-rate tenant subsidizes affordable units (${fmtP(premCp)} above market)`:` At ${fmtP(pr)} PILOT, market rents cover the target — no surcharge.`}</p></div>`;
   document.getElementById('wp').innerHTML=is100?`At <strong>${fmtP(pr)} PILOT</strong>, developer pays <strong>${fmtM(rC.tax)}/yr</strong> vs. <strong>${fmtM(convTax)}/yr</strong>. ${vc} ROC: <strong>${fmtP(aROC,2)}</strong> vs. ${fmtP(tgtROC,1)} target.`:`At <strong>${fmtP(pr)} PILOT</strong>, developer pays <strong>${fmtM(rC.tax)}/yr</strong> instead of <strong>${fmtM(convTax)}/yr</strong> — city foregoes <strong>${fmtM(ex)}/yr</strong>. ROC: <strong>${fmtP(aROC,2)}</strong> vs. <strong>${fmtP(tgtROC,1)} target</strong>. ${premC>0?`Blended rents need +<strong>${fmt$(Math.round(premC))}/mo</strong> to reach target (${fmt$(Math.round(rqB||mktBlend))}/mo avg).`:''} ${vc}${tfNote}${st2==='below'?` <strong>At ${t.name.toLowerCase()} rents this project will not get built without a lower PILOT, higher rents, or lower costs.</strong>`:''}`;
+  // ── Land price adjustment ────────────────────────────────────────────────
+  const showLand = document.getElementById('tLand').checked;
+  document.getElementById('landBox').style.display = showLand && !isZero ? 'block' : 'none';
+  if (showLand && !isZero && !is100) {
+    // Required LS at current set-aside to hit target ROC
+    const lsReq = reqLS(totalGPR, hc, N, tgtROC, pr, hasPilot);
+    // Required LS at zero set-aside (baseline — what land is worth without mandate)
+    const GPR_base = N * mktBlend * 12;
+    const lsBase = reqLS(GPR_base, hc, N, tgtROC, pr, hasPilot);
+    const impossible = lsReq === null || lsReq < 1.0;
+    const belowFloor = lsReq !== null && lsReq >= 1.0 && lsReq < 1.10;
+    const cls = impossible ? 'land-box impossible' : belowFloor ? 'land-box partial' : 'land-box';
+    const lsDelta = (lsBase && lsReq) ? lsBase - lsReq : null;
+    const deltaPerUnit = lsDelta ? lsDelta * hc : null;
+    const pctDrop = (lsDelta && lsBase) ? lsDelta / lsBase * 100 : null;
+    let html = '';
+    if (impossible) {
+      html = `<div class="${cls}">
+        <p class="land-lbl">Land adjustment — cannot restore feasibility</p>
+        <div class="land-grid">
+          <div class="land-cell"><p class="lc-lbl">Required land mult.</p><p class="lc-val">< 1.0×</p><p class="lc-sub">Impossible — free land isn't enough</p></div>
+          <div class="land-cell"><p class="lc-lbl">Current mult.</p><p class="lc-val">${ls.toFixed(2)}×</p><p class="lc-sub">Current assumption</p></div>
+          <div class="land-cell"><p class="lc-lbl">Baseline (no mandate)</p><p class="lc-val">${lsBase ? lsBase.toFixed(2)+'×' : '—'}</p><p class="lc-sub">Land value w/o mandate</p></div>
+        </div>
+        <p class="land-note">Even if land were <strong>free</strong>, this project cannot hit its ${fmtP(tgtROC,1)} ROC target at ${t.name.toLowerCase()} rents with a ${Math.round(sp*100)}% set-aside${hasPilot?' and a '+fmtP(pr)+' PILOT':''}. The mandate cost exceeds what land price adjustment alone can absorb. In this scenario, even a willing seller offering land for free cannot make the project pencil — one of several reasons sites may remain vacant rather than redevelop under the mandate.</p>
+      </div>`;
+    } else {
+      const landSoftReq = (lsReq - 1) * hc;
+      const landSoftNow = (ls - 1) * hc;
+      const deltaStr = deltaPerUnit ? fmt$(Math.round(deltaPerUnit)) : '—';
+      const pctStr = pctDrop ? pctDrop.toFixed(1)+'%' : '—';
+      html = `<div class="${cls}">
+        <p class="land-lbl">${belowFloor ? 'Land adjustment — theoretically possible but below typical floor' : 'Land adjustment — required to restore feasibility'}</p>
+        <div class="land-grid">
+          <div class="land-cell"><p class="lc-lbl">Required land mult.</p><p class="lc-val">${lsReq.toFixed(2)}×</p><p class="lc-sub">${fmtK((lsReq-1)*hc)}/unit land+soft</p></div>
+          <div class="land-cell"><p class="lc-lbl">Baseline (no mandate)</p><p class="lc-val">${lsBase ? lsBase.toFixed(2)+'×' : '—'}</p><p class="lc-sub">${lsBase ? fmtK(Math.round((lsBase-1)*hc))+'/unit without mandate' : ''}</p></div>
+          <div class="land-cell"><p class="lc-lbl">Required drop</p><p class="lc-val">${deltaStr}</p><p class="lc-sub">${pctStr} reduction per unit · ${lsDelta ? (lsDelta).toFixed(3)+'× multiplier drop' : ''}</p></div>
+        </div>
+        <p class="land-note">${belowFloor
+          ? `The required multiplier of <strong>${lsReq.toFixed(2)}×</strong> is below the typical floor for a <em>buildable</em> site (≥1.10×), meaning land would have to be nearly free. This is theoretically possible on a city-owned brownfield or heavily subsidized redevelopment site, but rare.`
+          : `For this project to hit its <strong>${fmtP(tgtROC,1)} ROC target</strong> at ${t.name.toLowerCase()} rents and a ${Math.round(sp*100)}% set-aside, land+soft costs would need to fall from <strong>${fmtK(Math.round(landSoftNow))}/unit</strong> to <strong>${fmtK(Math.round(landSoftReq))}/unit</strong> — a drop of <strong>${deltaStr} per unit</strong> (${pctStr}). This is the market mechanism IZO proponents assume will happen: landowners accept less because the mandate reduces what developers can pay. In practice, landowners with reservation prices often let sites sit vacant rather than sell at the new lower price — contributing to why many lots remain undeveloped under the mandate.`
+        }</p>
+      </div>`;
+    }
+    document.getElementById('landBox').innerHTML = html;
+  } else if (showLand && is100) {
+    document.getElementById('landBox').innerHTML = '<p style="font-size:12px;color:#888;margin-bottom:10px">100% affordable — no market-rate cross-subsidy, land adjustment analysis does not apply.</p>';
+    document.getElementById('landBox').style.display = 'block';
+  }
+
 }
 document.getElementById('sHC').value=getRegime(gv('sN'))[1];
 document.getElementById('sLS').value=DEFAULT_LS;
