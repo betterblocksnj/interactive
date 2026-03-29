@@ -200,10 +200,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <span class="sl-val" id="sROCv">5.5%</span>
 </div>
 <p class="sl-note" id="rocNote">Default for mid-rise (5.5%). Drag to model different investor hurdle rates. Strong markets like Jersey City typically support a 5.5–6% target; softer markets require higher returns to attract capital.</p>
-<div class="toggle-row" style="margin-bottom:4px">
-  <label class="toggle"><input type="checkbox" id="tPilot" checked onchange="onPilotToggle()"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
-  <label for="tPilot" style="font-size:13px;color:#555;cursor:pointer">Project receives a PILOT (payment in lieu of taxes)</label>
-</div>
 <div id="costBar"></div>
 
 <div class="hr"></div>
@@ -248,7 +244,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 
 <div id="pilotStatus"></div>
-<div class="opts" id="optsGrid"></div>
+<div class="opts" style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px">
+  <div id="optA"></div>
+  <div style="padding:2px 0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <label class="toggle" style="flex-shrink:0"><input type="checkbox" id="tPilot" onchange="onPilotToggle()"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+      <span id="pilotToggleLabel" style="font-size:13px;color:#555">Enable PILOT (payment in lieu of taxes) — turn on to see Option B</span>
+    </div>
+  </div>
+  <div id="optB"></div>
+</div>
+
 
 <div class="sbox" id="sbox">
   <p class="st">Adjust the PILOT rate</p>
@@ -275,7 +281,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="hr"></div>
 <p class="sec">Land price adjustment</p>
 <div class="land-toggle-row">
-  <label class="toggle"><input type="checkbox" id="tLand" onchange="go()"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+  <label class="toggle"><input type="checkbox" id="tLand" checked onchange="go()"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
   <label for="tLand" style="font-size:13px;color:#111;cursor:pointer">Show required land price adjustment to restore feasibility</label>
 </div>
 <div id="landBox" style="display:none"></div>
@@ -296,6 +302,13 @@ const TIERS=[
   {id:2,name:'Premium',cls:'A',st:3200,br1:4000,br2:5200,br3:6200},
   {id:3,name:'Luxury',cls:'A+',st:4000,br1:5000,br2:6500,br3:7800},
 ];
+// Default rent tier by building type (auto-switches as unit count changes)
+const REGIME_DEFAULT_TIER={0:1,31:1,81:1,201:1,401:2,801:3};
+function getRegimeTier(N){
+  let t=1;
+  for(const mn of [0,31,81,201,401,801]){if(N>=mn)t=REGIME_DEFAULT_TIER[mn];}
+  return t;
+}
 const REGIMES=[
   [0,  230000,0.055,'Small / boutique','Wood-frame, 4–5 stories'],
   [31, 255000,0.055,'Low-rise','Wood-frame or light steel, 5–7 stories'],
@@ -339,7 +352,15 @@ function requiredPilotRate(GPR, totalCost, tgtROC, is100) {
 }
 let pilotJustEnabled = false;
 function onPilotToggle() {
-  if (document.getElementById('tPilot').checked) pilotJustEnabled = true;
+  const hasPilot = document.getElementById('tPilot').checked;
+  if (hasPilot) {
+    pilotJustEnabled = true;
+    // Turn land price adjustment off when PILOT is enabled
+    document.getElementById('tLand').checked = false;
+  } else {
+    // Turn land price adjustment back on when PILOT is disabled
+    document.getElementById('tLand').checked = true;
+  }
   go();
 }
 function reqRentCalc(tNOI,affGPR,mktN,pr,hasPilot,convTax){
@@ -348,21 +369,23 @@ function reqRentCalc(tNOI,affGPR,mktN,pr,hasPilot,convTax){
   if(!isFinite(T)||T<0||!mktN)return null;
   return(T-affGPR)/mktN/12;
 }
-let sel=1,userHC=null,userLS=null,userROC=null;
+let sel=1,userHC=null,userLS=null,userROC=null,userTier=false;
 function resetROC(){userROC=null;const[,,,, tgt]=getRegime(gv('sN'));document.getElementById('sROC').value=(tgt*100).toFixed(1);go();}
 function resetHC(){userHC=null;const[,hc]=getRegime(gv('sN'));document.getElementById('sHC').value=hc;go();}
 function resetLS(){userLS=null;document.getElementById('sLS').value=DEFAULT_LS;go();}
 function renderTiers(){
   document.getElementById('tierGrid').innerHTML=TIERS.map(t=>`
-    <button class="tbtn${t.id===sel?' active':''}" onclick="sel=${t.id};renderTiers();go()">
+    <button class="tbtn${t.id===sel?' active':''}" onclick="sel=${t.id};userTier=true;renderTiers();go()">
       <span class="tn">${t.name} <span style="font-size:9px;opacity:.6">${t.cls}</span></span>
       <span class="tr2">${fmt$(t.br1)}/mo 1BR · ${fmt$(t.br2)}/mo 2BR</span>
-      <span class="td">${['Older stock','New construction median','Paulus Hook, Hamilton Park','Exchange Place, Newport'][t.id]}</span>
+      <span class="td">${['Older stock, some new construction up to 120% AMI','New construction median','Journal Square, Bergen-Lafayette','Waterfront, Downtown, Journal Square'][t.id]}</span>
     </button>`).join('');
 }
 renderTiers();
 document.getElementById('sN').addEventListener('input',function(){
-  if(userHC===null){const[,hc]=getRegime(parseInt(this.value));document.getElementById('sHC').value=hc;}
+  const N=parseInt(this.value);
+  if(userHC===null){const[,hc]=getRegime(N);document.getElementById('sHC').value=hc;}
+  if(!userTier){sel=getRegimeTier(N);renderTiers();}
   go();
 });
 ['sSet','sHC','sLS','sPilot','sROC'].forEach(id=>document.getElementById(id).addEventListener('input',function(){
@@ -516,14 +539,14 @@ document.getElementById('sPilot').min=is100?'0':'10';
   document.getElementById('pilotStatus').innerHTML=hasPilot?`<div class="pilot-status pilot-on">PILOT active — developer pays ${fmtP(pr)} of gross revenue instead of ${fmtM(convTax)}/yr conventional tax. At current rents, 15% of gross (${fmtM(p15)}/yr) ${pvc} conventional taxation.<div class="stat-note">N.J.S.A. 40A:20-12: ${is100?'100% affordable may go below 10% — HMFA recommends ~6.28%.':'Mixed projects: 10–15% of annual gross revenue.'} A 1.8% surcharge on gross revenue is applied on top of the stated PILOT rate (), making a '10% PILOT' cost 11.8% of gross.</div></div>`:`<div class="pilot-status pilot-off">No PILOT — developer pays full conventional property tax of ${fmtM(convTax)}/yr.<div class="stat-note">Municipalities are not required to grant PILOTs, even for projects with affordable set-asides.</div></div>`;
   const bBadge=r=>r>=tgtROC?`<span class="badge ok">Return on cost: ${fmtP(r,2)} — above ${fmtP(tgtROC,1)} target</span>`:r>=tgtROC*.85?`<span class="badge warn">Return on cost: ${fmtP(r,2)} — near target</span>`:`<span class="badge bad">Return on cost: ${fmtP(r,2)} — below target</span>`;
   if(isZero){document.getElementById('optsGrid').innerHTML=`<div class="opt" style="grid-column:1/-1;border-color:#e0e0e0"><h3 style="color:#111">No mandate — baseline</h3><p class="os" style="color:#555">No PILOT (return on cost): <strong>${fmtP(rBase.ROC,2)}</strong> ${bBadge(rBase.ROC)} &nbsp; 10% PILOT (return on cost): <strong>${fmtP(rocFn(N*mktBlend*12,PF,true,convTax,totalCost).ROC,2)}</strong> ${bBadge(rocFn(N*mktBlend*12,PF,true,convTax,totalCost).ROC)}<br><br>Slide set-aside above 0% to see mandate effects.</p></div>`;}
-  else if(is100){document.getElementById('optsGrid').innerHTML=`<div class="opt oc" style="grid-column:1/-1"><h3>100% affordable (53% AMI)</h3><p class="ov">${fmtP(aROC,2)} return on cost (ROC)</p><p class="os">Blended restricted rent: ${fmt$(Math.round(affBlend))}/mo. HMFA recommends ~6.28% PILOT. 10% floor does not apply (N.J.S.A. 40A:20-12).</p></div>`;}
+  else if(is100){document.getElementById('optB').innerHTML='';
+  document.getElementById('optA').innerHTML=`<div class="opt oc"><h3>100% affordable (53% AMI)</h3><p class="ov">${fmtP(aROC,2)} return on cost (ROC)</p><p class="os">Blended restricted rent: ${fmt$(Math.round(affBlend))}/mo. HMFA recommends ~6.28% PILOT. 10% floor does not apply (N.J.S.A. 40A:20-12).</p></div>`;}
   else{
     const rqNP=reqRentCalc(tNOI,affGPR,mktN,0,false,convTax);
     const rqPF=reqRentCalc(tNOI,affGPR,mktN,PF,true,convTax);
     const pNP=rqNP?Math.max(0,rqNP-mktBlend):0;
     const pPF=rqPF?Math.max(0,rqPF-mktBlend):0;
-    document.getElementById('optsGrid').innerHTML=`
-      <div class="opt oa">
+    document.getElementById('optA').innerHTML=`<div class="opt oa">
         <h3>Option A — No PILOT</h3>
         <p class="os" style="margin-bottom:8px">Return on cost: <strong>${fmtP(rNP.ROC,2)}</strong> at current market rents. Full ${fmtM(convTax)}/yr in conventional property taxes.</p>
         ${pNP>0
@@ -532,7 +555,8 @@ document.getElementById('sPilot').min=is100?'0':'10';
         }
         ${bBadge(rNP.ROC)}
       </div>
-      <div class="opt ob">
+`;
+  document.getElementById('optB').innerHTML=`<div class="opt ob">
         <h3>Option B — Negotiated PILOT (${fmtP(pr)} rate)</h3>
         <p class="os" style="margin-bottom:8px">Return on cost: <strong>${fmtP(rC.ROC,2)}</strong> at the current ${fmtP(pr)} PILOT rate. Adjust the slider below.</p>
         <p class="os"><strong>${fmtM(Math.max(0, convTax - rC.tax))}/yr in conventional property taxes forgone</strong> by the city to finance the affordable housing requirement. ${premC>0?`Rents would still need to rise <strong>${fmt$(Math.round(premC))}/mo per unit</strong> to hit the return target.`:'Market rents cover the target return at this PILOT rate.'}</p>
@@ -540,18 +564,17 @@ document.getElementById('sPilot').min=is100?'0':'10';
       </div>
     `;
   }
+  // Gray out Option B and update label based on PILOT state
+  const optBEl = document.getElementById('optB');
+  const lblEl = document.getElementById('pilotToggleLabel');
+  if (optBEl) {
+    optBEl.style.opacity = hasPilot ? '1' : '0.35';
+    optBEl.style.pointerEvents = hasPilot ? '' : 'none';
+  }
+  if (lblEl) lblEl.textContent = hasPilot ? 'PILOT active (payment in lieu of taxes)' : 'Enable PILOT (payment in lieu of taxes) — turn on to see Option B';
   document.getElementById('sbox').className=hasPilot&&!isZero?'sbox':'sbox disabled';
   document.getElementById('ssub').textContent=hasPilot?(is100?'100% affordable — may go below 10%. HMFA recommends ~6.28%.':isZero?'Set set-aside above 0% to activate.':'10–15% for mixed projects.'):'Toggle PILOT switch above to enable.';
-  if(!hasPilot||isZero){document.getElementById('sbar').innerHTML='';document.getElementById('sdets').innerHTML='';document.getElementById('wp').innerHTML=isZero?'Set set-aside above 0% to activate.':'Enable PILOT toggle above.';return;}
-  const ex=convTax-rC.tax,exF=convTax>0?Math.min(1,Math.max(0,ex/convTax)):0;
-  const exP=Math.round(exF*100),prP=100-exP;
-  document.getElementById('sbar').innerHTML=`<div style="width:${exP}%;background:#378ADD;height:100%;display:flex;align-items:center;justify-content:center;transition:width .15s;min-width:0">${exP>14?`<span style="font-size:11px;font-weight:500;color:#042C53">${exP}% PILOT coverage</span>`:''}</div><div style="flex:1;background:#EF9F27;height:100%;display:flex;align-items:center;justify-content:center;transition:width .15s;min-width:0">${prP>14?`<span style="font-size:11px;font-weight:500;color:#412402">${prP}% market-rate rent coverage</span>`:''}</div>`;
-  const pb=pr<=PF+.001?`<span class="badge ok">${is100?'Full exemption':'At 10% floor'}</span>`:pr>=PC-.001?`<span class="badge warn">At 15% ceiling</span>`:`<span class="badge info">Within statutory range</span>`;
-  const vc=rC.tax>convTax?`PILOT payment (${fmtM(rC.tax)}/yr) exceeds conventional tax (${fmtM(convTax)}/yr).`:`PILOT payment (${fmtM(rC.tax)}/yr) &lt; conventional tax (${fmtM(convTax)}/yr) — real PILOT coverage.`;
-  document.getElementById('sdets').innerHTML=is100?`<div class="sd sda" style="grid-column:1/-1"><p class="sdl">Forgone conventional property taxes</p><p class="sdv">${fmtM(ex)}/yr</p><p class="sds">Developer pays ${fmtP(pr)} = ${fmtM(rC.tax)}/yr vs. ${fmtM(convTax)}/yr · Return on cost (ROC): <strong>${fmtP(aROC,2)}</strong> vs. ${fmtP(tgtROC,1)} · ${pb}</p></div>`:`<div class="sd sda"><p class="sdl">Forgone conventional property taxes</p><p class="sdv">${fmtM(ex)}/yr</p><p class="sds">Foregone conventional property tax<br>Developer pays ${fmtP(pr)} = ${fmtM(rC.tax)}/yr vs. ${fmtM(convTax)}/yr<br>${pb}</p></div><div class="sd sdb"><p class="sdl">Market-rate tenants' contribution <span class="more-tag">MORE per unit</span></p><p class="sdv">${premC>0?fmt$(Math.round(premC))+'/mo above market avg':'No premium above market'}</p><p class="sds">${premC>0?`Blended market rent: ${fmt$(Math.round(mktBlend))}/mo<br>Required: <strong>${fmt$(Math.round(rqB||mktBlend))}/mo</strong><br>Each market-rate tenant subsidizes affordable units (${fmtP(premCp)} above market)`:` At ${fmtP(pr)} PILOT, market rents cover the target — no surcharge.`}</p></div>`;
-  document.getElementById('wp').innerHTML=is100?`At <strong>${fmtP(pr)} PILOT</strong>, developer pays <strong>${fmtM(rC.tax)}/yr</strong> vs. <strong>${fmtM(convTax)}/yr</strong>. ${vc} Return on cost (ROC): <strong>${fmtP(aROC,2)}</strong> vs. ${fmtP(tgtROC,1)} target.`:`At <strong>${fmtP(pr)} PILOT</strong>, developer pays <strong>${fmtM(rC.tax)}/yr</strong> instead of <strong>${fmtM(convTax)}/yr</strong> — forgoing <strong>${fmtM(ex)}/yr</strong> in conventional property taxes. Return on cost (ROC): <strong>${fmtP(aROC,2)}</strong> vs. <strong>${fmtP(tgtROC,1)} target</strong>. ${premC>0?`Blended rents need +<strong>${fmt$(Math.round(premC))}/mo</strong> to reach target (${fmt$(Math.round(rqB||mktBlend))}/mo avg).`:''} ${vc}${tfNote}${st2==='below'?` <strong>At ${t.name.toLowerCase()} rents this project will not get built without a lower PILOT, higher rents, or lower costs.</strong>`:''}`;
-  // ── Land price adjustment ────────────────────────────────────────────────
-  const showLand = document.getElementById('tLand').checked;
+    const showLand = document.getElementById('tLand').checked;
   document.getElementById('landBox').style.display = showLand && !isZero ? 'block' : 'none';
   if (showLand && !isZero && !is100) {
     // Required LS at current set-aside to hit target ROC
@@ -578,21 +601,21 @@ document.getElementById('sPilot').min=is100?'0':'10';
       </div>`;
     } else {
       const landSoftReq = (lsReq - 1) * hc;
-      const landSoftNow = (ls - 1) * hc;
       const deltaStr = deltaPerUnit ? fmt$(Math.round(deltaPerUnit)) : '—';
       const pctStr = pctDrop ? pctDrop.toFixed(1)+'%' : '—';
-      html = `<div class="${cls}">
-        <p class="land-lbl">${belowFloor ? 'Land adjustment — theoretically possible but below typical floor' : 'Land adjustment — required to restore feasibility'}</p>
-        <div class="land-grid">
-          <div class="land-cell"><p class="lc-lbl">Required land mult.</p><p class="lc-val">${lsReq.toFixed(2)}×</p><p class="lc-sub">${fmtK((lsReq-1)*hc)}/unit land+soft</p></div>
-          <div class="land-cell"><p class="lc-lbl">Baseline (no mandate)</p><p class="lc-val">${lsBase ? lsBase.toFixed(2)+'×' : '—'}</p><p class="lc-sub">${lsBase ? fmtK(Math.round((lsBase-1)*hc))+'/unit without mandate' : ''}</p></div>
-          <div class="land-cell"><p class="lc-lbl">Required drop</p><p class="lc-val">${deltaStr}</p><p class="lc-sub">${pctStr} reduction per unit · ${lsDelta ? (lsDelta).toFixed(3)+'× multiplier drop' : ''}</p></div>
-        </div>
-        <p class="land-note">${belowFloor
-          ? `The required multiplier of <strong>${lsReq.toFixed(2)}×</strong> is below the typical floor for a <em>buildable</em> site (≥1.10×), meaning land would have to be nearly free. This is theoretically possible on a city-owned brownfield or heavily subsidized redevelopment site, but rare.`
-          : `For this project to hit its <strong>${fmtP(tgtROC,1)} return on cost target</strong> at ${t.name.toLowerCase()} rents and a ${Math.round(sp*100)}% set-aside, The mandate reduces the maximum land value developers can pay by <strong>${deltaStr} per unit</strong> (${pctStr}) — from <strong>${lsBase ? fmtK(Math.round((lsBase-1)*hc)) : "—"}/unit</strong> without the mandate to <strong>${fmtK(Math.round(landSoftReq))}/unit</strong> with a ${Math.round(sp*100)}% set-aside. This is the market mechanism IZO proponents assume will make mandates self-financing: landowners accept less because the mandate reduces what developers can pay. In practice, landowners with reservation prices often let sites sit vacant rather than sell at the new lower price — contributing to why many lots remain undeveloped under the mandate.`
-        }</p>
-      </div>`;
+      const landLbl = belowFloor ? 'Land adjustment — theoretically possible but below typical floor' : 'Land adjustment — required to restore feasibility';
+      const landNote = belowFloor
+        ? 'The required multiplier of ' + lsReq.toFixed(2) + '× is below the typical floor for a buildable site (≥1.10×), meaning land would have to be nearly free. This is theoretically possible on a city-owned brownfield or heavily subsidized redevelopment site, but rare.'
+        : 'The mandate reduces the maximum land value developers can pay by <strong>' + deltaStr + ' per unit</strong> (' + pctStr + ') — from <strong>' + (lsBase ? fmtK(Math.round((lsBase-1)*hc)) : '—') + '/unit</strong> without the mandate to <strong>' + fmtK(Math.round(landSoftReq)) + '/unit</strong> with a ' + Math.round(sp*100) + '% set-aside. This is the market mechanism IZO proponents assume will make mandates self-financing: landowners accept less because the mandate reduces what developers can pay. In practice, landowners with reservation prices often let sites sit vacant rather than sell at the new lower price — contributing to why many lots remain undeveloped under the mandate.';
+      html = '<div class="' + cls + '">'
+        + '<p class="land-lbl">' + landLbl + '</p>'
+        + '<div class="land-grid">'
+        + '<div class="land-cell"><p class="lc-lbl">Required land mult.</p><p class="lc-val">' + lsReq.toFixed(2) + '×</p><p class="lc-sub">' + fmtK((lsReq-1)*hc) + '/unit land+soft</p></div>'
+        + '<div class="land-cell"><p class="lc-lbl">Baseline (no mandate)</p><p class="lc-val">' + (lsBase ? lsBase.toFixed(2)+'×' : '—') + '</p><p class="lc-sub">' + (lsBase ? fmtK(Math.round((lsBase-1)*hc))+'/unit without mandate' : '') + '</p></div>'
+        + '<div class="land-cell"><p class="lc-lbl">Required drop</p><p class="lc-val">' + deltaStr + '</p><p class="lc-sub">' + pctStr + ' reduction per unit · ' + (lsDelta ? lsDelta.toFixed(3)+'× multiplier drop' : '') + '</p></div>'
+        + '</div>'
+        + '<p class="land-note">' + landNote + '</p>'
+        + '</div>';
     }
     document.getElementById('landBox').innerHTML = html;
   } else if (showLand && is100) {
@@ -600,10 +623,20 @@ document.getElementById('sPilot').min=is100?'0':'10';
     document.getElementById('landBox').style.display = 'block';
   }
 
+
+
+  if(!hasPilot||isZero){document.getElementById('sbar').innerHTML='';document.getElementById('sdets').innerHTML='';document.getElementById('wp').innerHTML=isZero?'Set set-aside above 0% to activate.':'Enable PILOT toggle above.';return;}
+  const ex=convTax-rC.tax,exF=convTax>0?Math.min(1,Math.max(0,ex/convTax)):0; const exP=Math.round(exF*100),prP=100-exP;
+  document.getElementById('sbar').innerHTML=`<div style="width:${exP}%;background:#378ADD;height:100%;display:flex;align-items:center;justify-content:center;transition:width .15s;min-width:0">${exP>14?`<span style="font-size:11px;font-weight:500;color:#042C53">${exP}% PILOT coverage</span>`:''}</div><div style="flex:1;background:#EF9F27;height:100%;display:flex;align-items:center;justify-content:center;transition:width .15s;min-width:0">${prP>14?`<span style="font-size:11px;font-weight:500;color:#412402">${prP}% market-rate rent coverage</span>`:''}</div>`; const pb=pr<=PF+.001?`<span class="badge ok">${is100?'Full exemption':'At 10% floor'}</span>`:pr>=PC-.001?`<span class="badge warn">At 15% ceiling</span>`:`<span class="badge info">Within statutory range</span>`; const vc=rC.tax>convTax?`PILOT payment (${fmtM(rC.tax)}/yr) exceeds conventional tax (${fmtM(convTax)}/yr).`:`PILOT payment (${fmtM(rC.tax)}/yr) < conventional tax (${fmtM(convTax)}/yr) — real PILOT coverage.`;
+  document.getElementById('sdets').innerHTML=is100?`<div class="sd sda" style="grid-column:1/-1"><p class="sdl">Forgone conventional property taxes</p><p class="sdv">${fmtM(ex)}/yr</p><p class="sds">Developer pays ${fmtP(pr)} = ${fmtM(rC.tax)}/yr vs. ${fmtM(convTax)}/yr · Return on cost (ROC): <strong>${fmtP(aROC,2)}</strong> vs. ${fmtP(tgtROC,1)} · ${pb}</p></div>`:`<div class="sd sda"><p class="sdl">Forgone conventional property taxes</p><p class="sdv">${fmtM(ex)}/yr</p><p class="sds">Foregone conventional property tax<br>Developer pays ${fmtP(pr)} = ${fmtM(rC.tax)}/yr vs. ${fmtM(convTax)}/yr<br>${pb}</p></div><div class="sd sdb"><p class="sdl">Market-rate tenants' contribution <span class="more-tag">MORE per unit</span></p><p class="sdv">${premC>0?fmt$(Math.round(premC))+'/mo above market avg':'No premium above market'}</p><p class="sds">${premC>0?`Blended market rent: ${fmt$(Math.round(mktBlend))}/mo<br>Required: <strong>${fmt$(Math.round(rqB||mktBlend))}/mo</strong><br>Each market-rate tenant subsidizes affordable units (${fmtP(premCp)} above market)`:` At ${fmtP(pr)} PILOT, market rents cover the target — no surcharge.`}</p></div>`;
+  document.getElementById('wp').innerHTML=is100?`At <strong>${fmtP(pr)} PILOT</strong>, developer pays <strong>${fmtM(rC.tax)}/yr</strong> vs. <strong>${fmtM(convTax)}/yr</strong>. ${vc} Return on cost (ROC): <strong>${fmtP(aROC,2)}</strong> vs. ${fmtP(tgtROC,1)} target.`:`At <strong>${fmtP(pr)} PILOT</strong>, developer pays <strong>${fmtM(rC.tax)}/yr</strong> instead of <strong>${fmtM(convTax)}/yr</strong> — forgoing <strong>${fmtM(ex)}/yr</strong> in conventional property taxes. Return on cost (ROC): <strong>${fmtP(aROC,2)}</strong> vs. <strong>${fmtP(tgtROC,1)} target</strong>. ${premC>0?`Blended rents need +<strong>${fmt$(Math.round(premC))}/mo</strong> to reach target (${fmt$(Math.round(rqB||mktBlend))}/mo avg).`:''} ${vc}${tfNote}${st2==='below'?` <strong>At ${t.name.toLowerCase()} rents this project will not get built without a lower PILOT, higher rents, or lower costs.</strong>`:''}`;
 }
 document.getElementById('sHC').value=getRegime(gv('sN'))[1];
+sel=getRegimeTier(gv('sN'));
+renderTiers();
 document.getElementById('sLS').value=DEFAULT_LS;
 go();
+
 </script>
 </body>
 </html>
