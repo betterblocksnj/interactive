@@ -8,24 +8,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --paper:#1b1916;--paper2:#222018;--paper3:#2a2820;
-  --ink:#ede8dc;--ink2:#a89e88;--ink3:#6a6050;
-  --gold:#c0962a;--rule:#302c22;
+  --paper:#ffffff;--paper2:#f8f7f4;--paper3:#f0ede8;
+  --ink:#1a1612;--ink2:#4a3f35;--ink3:#7a6f62;
+  --gold:#9a6e10;--rule:#ddd6ca;
   --city:#4a82c8;--school:#8060c8;--county:#3aaa78;
-  --green:#3a9858;--green-lt:#0c2016;
-  --amber:#c87820;--amber-lt:#281808;
-  --red:#c84030;--red-lt:#280808;
+  --green:#3a9858;--green-lt:#d4ede0;
+  --amber:#c87820;--amber-lt:#faebd0;
+  --red:#c84030;--red-lt:#f7ddd8;
   --tier0:#6aaa88;--tier1:#d89030;--tier2:#6090d0;--tier3:#c068a8;
 }
 body{background:var(--paper);color:var(--ink);font-family:'Barlow',sans-serif;min-height:100vh}
-.mast{background:#111009;border-bottom:1px solid #302c18;padding:22px 30px 18px;position:relative}
+.mast{background:#1a1612;border-bottom:1px solid #2e2820;padding:22px 30px 18px;position:relative}
 .mast::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--city),var(--school),var(--county))}
 .kicker{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
 .mast h1{font-family:'Playfair Display',serif;font-size:clamp(17px,2.8vw,26px);font-weight:700;line-height:1.15;color:var(--ink);max-width:680px}
 .deck{margin-top:6px;font-size:12px;color:var(--ink3);max-width:560px;line-height:1.65}
 .nav{display:flex;background:var(--paper2);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:20}
 .nb{flex:1;padding:11px 8px 9px;border:none;background:none;cursor:pointer;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .18s;line-height:1.3}
-.nb:hover{background:#272420;color:var(--ink2)}
+.nb:hover{background:#f0ede8;color:var(--ink2)}
 .nb .nt{display:block;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;opacity:.45;margin-top:2px}
 .nb.a0{color:var(--red);border-bottom-color:var(--red);background:var(--red-lt)}
 .nb.a1{color:var(--amber);border-bottom-color:var(--amber);background:var(--amber-lt)}
@@ -49,7 +49,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
 .verdict.v0{background:var(--red-lt);border-color:var(--red)}
 .verdict.v1{background:var(--amber-lt);border-color:var(--amber)}
 .verdict.v2{background:var(--green-lt);border-color:var(--green)}
-.verdict.vn{background:#1a1a12;border-color:var(--ink3)}
+.verdict.vn{background:#f4f4ee;border-color:var(--ink3)}
 .vh{font-family:'Playfair Display',serif;font-size:clamp(13px,1.9vw,17px);font-weight:700;line-height:1.2;margin-bottom:3px}
 .verdict.v0 .vh{color:var(--red)}.verdict.v1 .vh{color:var(--amber)}.verdict.v2 .vh{color:var(--green)}.verdict.vn .vh{color:var(--ink2)}
 .vs{font-size:11px;line-height:1.6;color:var(--ink2)}
@@ -73,12 +73,12 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
 .bar-row-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;gap:8px;flex-wrap:wrap}
 .bar-row-label{font-size:11px;font-weight:600;color:var(--ink2)}
 .bar-row-total{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--ink)}
-.bar-track{height:24px;border-radius:3px;background:#252018;display:flex;overflow:hidden}
+.bar-track{height:24px;border-radius:3px;background:#e8e4dc;display:flex;overflow:hidden}
 .bar-seg{height:100%;transition:width .55s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden}
-.bar-seg.city{background:var(--city);color:#071528}
-.bar-seg.school{background:var(--school);color:#100828}
-.bar-seg.county{background:var(--county);color:#061a10}
-.bar-seg.void{background:#302820;border:1px dashed #50402a;color:var(--ink3)}
+.bar-seg.city{background:var(--city);color:#fff}
+.bar-seg.school{background:var(--school);color:#fff}
+.bar-seg.county{background:var(--county);color:#fff}
+.bar-seg.void{background:#f0e8e0;border:1px dashed #c0a888;color:var(--ink3)}
 .rate-breakdown{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .rb-item{display:flex;align-items:center;gap:5px;font-size:10px}
 .rb-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
@@ -93,7 +93,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
 .neg{color:var(--red)!important}.pos{color:var(--green)!important}
 .city-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .city-name{font-size:11px;font-weight:600;width:88px;flex-shrink:0;transition:color .3s}
-.city-bg{flex:1;height:16px;background:#252018;border-radius:3px;overflow:hidden}
+.city-bg{flex:1;height:16px;background:#e8e4dc;border-radius:3px;overflow:hidden}
 .city-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;transition:width .5s,background .3s}
 .city-stat{font-size:10px;color:var(--ink3);width:160px;flex-shrink:0;text-align:right;transition:color .3s;line-height:1.4}
 .city-divider{border:none;border-top:1px dashed var(--rule);margin:4px 0 7px}
@@ -166,7 +166,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
       <div class="rb-item"><div class="rb-dot" style="background:var(--city)"></div><span class="rb-label">City of Jersey City</span><span class="rb-rate" style="color:var(--city)">0.85%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 38% of levy</span></div>
       <div class="rb-item"><div class="rb-dot" style="background:var(--school)"></div><span class="rb-label">JCPS Schools</span><span class="rb-rate" style="color:var(--school)">0.95%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 43% of levy</span></div>
       <div class="rb-item"><div class="rb-dot" style="background:var(--county)"></div><span class="rb-label">Hudson County</span><span class="rb-rate" style="color:var(--county)">0.43%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 19% of levy</span></div>
-      <div class="rb-item"><div class="rb-dot" style="background:#2a2018;border:1px solid var(--ink3)"></div><span class="rb-label" style="color:var(--ink3)">Total: 2.23% · $435K assessed value/unit (JC UFB-derived)</span></div>
+      <div class="rb-item"><div class="rb-dot" style="background:#e8e4dc;border:1px solid var(--ink3)"></div><span class="rb-label" style="color:var(--ink3)">Total: 2.23% · $435K assessed value/unit (JC UFB-derived)</span></div>
     </div>
     <div class="bar-group">
       <div class="bar-row-head"><span class="bar-row-label">🏙️ City of Jersey City <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--city);margin-left:4px">0.85% · ~38% of levy</span></span><span class="bar-row-total" id="bt_city">—</span></div>
@@ -182,7 +182,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
     </div>
     <div class="legend" style="margin-top:10px">
       <div class="li"><div class="ls" style="background:var(--city)"></div>Conventional property tax collected</div>
-      <div class="li" id="void_leg"><div class="ls" style="background:#302820;border:1px dashed #50402a"></div><span>Revenue void — units never built (DWL)</span></div>
+      <div class="li" id="void_leg"><div class="ls" style="background:#f0e8e0;border:1px dashed #c0a888"></div><span>Revenue void — units never built (DWL)</span></div>
       <div class="li" id="pilot_leg" style="display:none"><div class="ls" style="background:var(--school);opacity:.4"></div>School &amp; county receive $0 on PILOT-abated units (NJ law)</div>
     </div>
   </div>
@@ -201,7 +201,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
     <div class="panel-sub">Raw annual permitted units (not per capita) · Source: Better Blocks NJ (March 2026), Cambridge Day, Zillow ORI</div>
     <div class="city-row">
       <span class="city-name" style="color:var(--ink2)">JC baseline</span>
-      <div class="city-bg"><div class="city-fill" style="background:#3a3020;width:100%;color:var(--ink3)">~5,500/yr · no IZO</div></div>
+      <div class="city-bg"><div class="city-fill" style="background:#d8d0c4;width:100%;color:var(--ink3)">~5,500/yr · no IZO</div></div>
       <span class="city-stat">~5,500 mkt · 0 aff</span>
     </div>
     <div class="city-row" id="jc_proj_row">
@@ -212,12 +212,12 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
     <hr class="city-divider">
     <div class="city-row">
       <span class="city-name" style="color:var(--amber)">San Francisco</span>
-      <div class="city-bg"><div class="city-fill" style="background:var(--amber);width:40%;color:#1a0800">~2,200/yr</div></div>
+      <div class="city-bg"><div class="city-fill" style="background:var(--amber);width:40%;color:#fff">~2,200/yr</div></div>
       <span class="city-stat">21% unfunded → cut to 12–16%</span>
     </div>
     <div class="city-row">
       <span class="city-name" style="color:var(--amber)">Boston</span>
-      <div class="city-bg"><div class="city-fill" style="background:var(--amber);width:25%;color:#1a0800">~1,400/yr</div></div>
+      <div class="city-bg"><div class="city-fill" style="background:var(--amber);width:25%;color:#fff">~1,400/yr</div></div>
       <span class="city-stat">17% unfunded · seeking state aid</span>
     </div>
     <div class="city-row">
@@ -355,11 +355,11 @@ function renderHeatGrid(sp,sc,bon,pr){
       const rocTgt=TIERS[ti].rocTgt,ratio=r.ROC/rocTgt;
       const rp=(r.ROC*100).toFixed(1),tp=(rocTgt*100).toFixed(1);
       let bg,tc,lbl;
-      if(ratio>=1.05){bg='#0c2a14';tc='#5acc7a';lbl='Feasible';}
-      else if(ratio>=1.00){bg='#1a2a0c';tc='#8acc48';lbl='At target';}
-      else if(ratio>=0.90){bg='#2a1e04';tc='#c89030';lbl='Marginal';}
-      else if(ratio>=0.80){bg='#280c04';tc='#c85030';lbl='Infeasible';}
-      else{bg='#1e0404';tc='#c03020';lbl='Collapsed';}
+      if(ratio>=1.05){bg='#d4f0e0';tc='#1a6e3a';lbl='Feasible';}
+      else if(ratio>=1.00){bg='#e0f0c8';tc='#3a6010';lbl='At target';}
+      else if(ratio>=0.90){bg='#faebd0';tc='#7a4a00';lbl='Marginal';}
+      else if(ratio>=0.80){bg='#fdddd8';tc='#8a1a08';lbl='Infeasible';}
+      else{bg='#f8ccc8';tc='#7a1010';lbl='Collapsed';}
       html+=`<div class="hg-cell" style="background:${bg}"><div class="roc-val" style="color:${tc}">${rp}%</div><div class="roc-lbl" style="color:${tc}">tgt ${tp}% · ${lbl}</div></div>`;
     });
   });
