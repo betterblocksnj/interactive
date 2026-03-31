@@ -107,22 +107,22 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
 <div class="mast">
   <div class="kicker">Better Blocks NJ Housing Policy Series</div>
   <h1>The Fiscal Cost of Inclusionary Zoning in Jersey City</h1>
-  <p class="deck">Every unit of housing is a tax-base event. When a mandate suppresses supply, the city, schools, and county all lose revenue. Adjust the IZO level and funding structure to see the full ledger.</p>
+  <p class="deck">Every unit of housing adds to the tax base. When a change to municipal land use regulations suppresses supply, the city, public schools, and county all lose out on new property tax revenue. Adjust the mandatory affordable housing set-aside to see the impacts.</p>
 </div>
 <div class="nav" id="nav">
-  <button class="nb a0" data-s="0">Unfunded Mandate<span class="nt">no PILOT · no density bonus</span></button>
+  <button class="nb a0" data-s="0">Unfunded Mandatory IZO<span class="nt">no PILOT · no density bonus</span></button>
   <button class="nb" data-s="1">Upzoning + Density Bonus<span class="nt">no PILOT</span></button>
-  <button class="nb" data-s="2">Fully Funded<span class="nt">PILOT + density bonus</span></button>
+  <button class="nb" data-s="2">Fully Funded Mandatory IZO<span class="nt">PILOT + density bonus</span></button>
 </div>
 <div class="main">
   <div class="controls">
     <div class="ctrl-group" id="ctrlSet">
-      <div class="ctrl-label">Affordable set-aside</div>
+      <div class="ctrl-label">Affordable Housing Set-Aside</div>
       <div class="ctrl-row">
-        <input type="range" id="slSet" min="0" max="25" step="1" value="15">
-        <div class="ctrl-val" id="slSetV">15%</div>
+        <input type="range" id="slSet" min="0" max="25" step="1" value="20">
+        <div class="ctrl-val" id="slSetV">20%</div>
       </div>
-      <div class="ctrl-note">0% = no mandate · JC Ch. 187 Tier 1 = 10% · Tier 2 = 15%</div>
+      <div class="ctrl-note">0% = no mandate · JC Ch. 187 Tier 1 = 10% · Tier 2 = 15% · Proposed IZO = 20%</div>
     </div>
     <div class="ctrl-group disabled" id="ctrlBonus">
       <div class="ctrl-label">Density / height bonus<span class="disabled-tag" id="bonusDisabledTag">not available — unfunded mandate</span></div>
@@ -149,8 +149,8 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
     <div class="card"><div class="card-label">Annual Tax Revenue Δ</div><div class="card-val" id="cv_taxlost">—</div><div class="card-sub" id="cv_taxlost_sub">city + school + county</div></div>
   </div>
   <div class="panel">
-    <div class="panel-head">Which projects go infeasible first? — Return on cost by building type &amp; rent tier</div>
-    <div class="panel-sub">ROC at current inputs vs. target. 🔴 Infeasible · 🟡 Marginal · 🟢 Feasible. The density bonus improves ROC by spreading fixed land cost across more units.</div>
+    <div class="panel-head">Which projects become infeasible first? — Return on cost by building type &amp; rent tier</div>
+    <div class="panel-sub">Return on cost at current inputs vs. target. 🔴 Infeasible · 🟡 Marginal · 🟢 Feasible. The density bonus improves return on cost by spreading fixed land cost across more units.</div>
     <div class="heat-grid" id="heatGrid"></div>
     <div class="legend">
       <div class="li"><div class="ls" style="background:var(--tier0)"></div>Workforce B−</div>
@@ -164,7 +164,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
     <div class="panel-head">Annual property tax revenue — baseline vs. this scenario (per 5,500-unit baseline)</div>
     <div class="rate-breakdown">
       <div class="rb-item"><div class="rb-dot" style="background:var(--city)"></div><span class="rb-label">City of Jersey City</span><span class="rb-rate" style="color:var(--city)">0.85%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 38% of levy</span></div>
-      <div class="rb-item"><div class="rb-dot" style="background:var(--school)"></div><span class="rb-label">JCPS Schools</span><span class="rb-rate" style="color:var(--school)">0.95%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 43% of levy</span></div>
+      <div class="rb-item"><div class="rb-dot" style="background:var(--school)"></div><span class="rb-label">JCPS (schools)</span><span class="rb-rate" style="color:var(--school)">0.95%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 43% of levy</span></div>
       <div class="rb-item"><div class="rb-dot" style="background:var(--county)"></div><span class="rb-label">Hudson County</span><span class="rb-rate" style="color:var(--county)">0.43%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 19% of levy</span></div>
       <div class="rb-item"><div class="rb-dot" style="background:#e8e4dc;border:1px solid var(--ink3)"></div><span class="rb-label" style="color:var(--ink3)">Total: 2.23% · $435K assessed value/unit (JC UFB-derived)</span></div>
     </div>
@@ -173,7 +173,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
       <div class="bar-track"><div class="bar-seg city" id="bs_city"></div><div class="bar-seg void" id="bv_city"></div></div>
     </div>
     <div class="bar-group">
-      <div class="bar-row-head"><span class="bar-row-label">🏫 Jersey City Public Schools <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--school);margin-left:4px">0.95% · ~43% of levy</span></span><span class="bar-row-total" id="bt_school">—</span></div>
+      <div class="bar-row-head"><span class="bar-row-label">🏫 JCPS (schools) <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--school);margin-left:4px">0.95% · ~43% of levy</span></span><span class="bar-row-total" id="bt_school">—</span></div>
       <div class="bar-track"><div class="bar-seg school" id="bs_school"></div><div class="bar-seg void" id="bv_school"></div></div>
     </div>
     <div class="bar-group">
@@ -201,8 +201,8 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
     <div class="panel-sub">Raw annual permitted units (not per capita) · Source: Better Blocks NJ (March 2026), Cambridge Day, Zillow ORI</div>
     <div class="city-row">
       <span class="city-name" style="color:var(--ink2)">JC baseline</span>
-      <div class="city-bg"><div class="city-fill" style="background:#d8d0c4;width:100%;color:var(--ink3)">~5,500/yr · no IZO</div></div>
-      <span class="city-stat">~5,500 mkt · 0 aff</span>
+      <div class="city-bg"><div class="city-fill" style="background:#d8d0c4;width:100%;color:var(--ink3)">~5,500/yr · no citywide mandate (~100 affordable from existing programs)</div></div>
+      <span class="city-stat">~5,400 market-rate · ~100 affordable</span>
     </div>
     <div class="city-row" id="jc_proj_row">
       <span class="city-name" id="jc_proj_name">JC projected</span>
@@ -360,7 +360,7 @@ function renderHeatGrid(sp,sc,bon,pr){
       else if(ratio>=0.90){bg='#faebd0';tc='#7a4a00';lbl='Marginal';}
       else if(ratio>=0.80){bg='#fdddd8';tc='#8a1a08';lbl='Infeasible';}
       else{bg='#f8ccc8';tc='#7a1010';lbl='Collapsed';}
-      html+=`<div class="hg-cell" style="background:${bg}"><div class="roc-val" style="color:${tc}">${rp}%</div><div class="roc-lbl" style="color:${tc}">tgt ${tp}% · ${lbl}</div></div>`;
+      html+=`<div class="hg-cell" style="background:${bg}"><div class="roc-val" style="color:${tc}">${rp}%</div><div class="roc-lbl" style="color:${tc}">Target ${tp}% · ${lbl}</div></div>`;
     });
   });
   document.getElementById('heatGrid').innerHTML=html;
@@ -385,7 +385,7 @@ function render(){
   const totalBuilt=totalMkt+totalAff;
   const{cityRev,schoolRev,countyRev,baseCity,baseSchool,baseCounty}=computeFiscal(totalMkt,totalAff,sc,effectivePr);
   const baseTot=baseCity+baseSchool+baseCounty,scenTot=cityRev+schoolRev+countyRev,deltaTot=scenTot-baseTot;
-  const scLabel=['Unfunded Mandate','Upzoning + Bonus','PILOT + Bonus'][sc];
+  const scLabel=['Unfunded Mandatory IZO','Upzoning + Bonus','Fully Funded Mandatory IZO'][sc];
   let verdictClass,vh,vs;
   if(noMandate){
     verdictClass='vn';
@@ -454,7 +454,7 @@ function render(){
   document.getElementById('jc_proj_fill').style.width=pct+'%';
   document.getElementById('jc_proj_fill').textContent=pct>15?`~${totalBuilt.toLocaleString()}/yr (${scLabel})`:'';
   document.getElementById('jc_proj_stat').style.color=scColor;
-  const affLine=noMandate?'0 aff (no mandate)':`~${totalAff.toLocaleString()} aff · ~${totalMkt.toLocaleString()} mkt`;
+  const affLine=noMandate?'0 affordable (no mandate)':`~${totalAff.toLocaleString()} affordable · ~${totalMkt.toLocaleString()} market-rate`;
   document.getElementById('jc_proj_stat').innerHTML=`~${totalBuilt.toLocaleString()}/yr<br><span style="font-size:9px;color:var(--ink3)">${affLine}</span>`;
 }
 document.getElementById('slSet').addEventListener('input',e=>{document.getElementById('slSetV').textContent=e.target.value+'%';render();});
