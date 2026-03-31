@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fiscal Cost of Inclusionary Zoning in Jersey City — Better Blocks NJ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#1b1916;--paper2:#222018;--paper3:#2a2820;
+  --ink:#ede8dc;--ink2:#a89e88;--ink3:#6a6050;
+  --gold:#c0962a;--rule:#302c22;
+  --city:#4a82c8;--school:#8060c8;--county:#3aaa78;
+  --green:#3a9858;--green-lt:#0c2016;
+  --amber:#c87820;--amber-lt:#281808;
+  --red:#c84030;--red-lt:#280808;
+  --tier0:#6aaa88;--tier1:#d89030;--tier2:#6090d0;--tier3:#c068a8;
+}
+body{background:var(--paper);color:var(--ink);font-family:'Barlow',sans-serif;min-height:100vh}
+.mast{background:#111009;border-bottom:1px solid #302c18;padding:22px 30px 18px;position:relative}
+.mast::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--city),var(--school),var(--county))}
+.kicker{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.mast h1{font-family:'Playfair Display',serif;font-size:clamp(17px,2.8vw,26px);font-weight:700;line-height:1.15;color:var(--ink);max-width:680px}
+.deck{margin-top:6px;font-size:12px;color:var(--ink3);max-width:560px;line-height:1.65}
+.nav{display:flex;background:var(--paper2);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:20}
+.nb{flex:1;padding:11px 8px 9px;border:none;background:none;cursor:pointer;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .18s;line-height:1.3}
+.nb:hover{background:#272420;color:var(--ink2)}
+.nb .nt{display:block;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;opacity:.45;margin-top:2px}
+.nb.a0{color:var(--red);border-bottom-color:var(--red);background:var(--red-lt)}
+.nb.a1{color:var(--amber);border-bottom-color:var(--amber);background:var(--amber-lt)}
+.nb.a2{color:var(--green);border-bottom-color:var(--green);background:var(--green-lt)}
+.main{padding:18px 24px 28px;max-width:980px;margin:0 auto}
+@media(max-width:600px){.main{padding:12px 12px 20px}}
+.controls{background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.ctrl-group{display:flex;flex-direction:column;gap:4px;transition:opacity .25s}
+.ctrl-group.disabled{opacity:.35;pointer-events:none}
+.ctrl-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.ctrl-label .disabled-tag{font-size:8px;font-weight:500;color:var(--red);letter-spacing:.05em;margin-left:6px;text-transform:none}
+.ctrl-row{display:flex;align-items:center;gap:8px}
+input[type=range]{-webkit-appearance:none;height:4px;background:var(--rule);border-radius:2px;outline:none;cursor:pointer;width:160px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);border:2px solid var(--paper);cursor:pointer}
+input[type=range]:disabled{opacity:.4;cursor:not-allowed}
+input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shadow:none}
+.ctrl-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--gold);min-width:40px}
+.ctrl-val.muted{color:var(--ink3)}
+.ctrl-note{font-size:10px;color:var(--ink3)}
+.verdict{border-radius:7px;padding:12px 16px;margin-bottom:14px;border-left:3px solid;transition:all .3s}
+.verdict.v0{background:var(--red-lt);border-color:var(--red)}
+.verdict.v1{background:var(--amber-lt);border-color:var(--amber)}
+.verdict.v2{background:var(--green-lt);border-color:var(--green)}
+.verdict.vn{background:#1a1a12;border-color:var(--ink3)}
+.vh{font-family:'Playfair Display',serif;font-size:clamp(13px,1.9vw,17px);font-weight:700;line-height:1.2;margin-bottom:3px}
+.verdict.v0 .vh{color:var(--red)}.verdict.v1 .vh{color:var(--amber)}.verdict.v2 .vh{color:var(--green)}.verdict.vn .vh{color:var(--ink2)}
+.vs{font-size:11px;line-height:1.6;color:var(--ink2)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:580px){.cards{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--paper2);border:1px solid var(--rule);border-radius:7px;padding:10px 12px}
+.card-label{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}
+.card-val{font-family:'Playfair Display',serif;font-size:clamp(16px,2.4vw,22px);font-weight:700;line-height:1;transition:color .3s}
+.card-sub{font-size:9px;color:var(--ink3);margin-top:2px}
+.panel{background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:15px 16px 13px;margin-bottom:14px}
+.panel-head{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:4px}
+.panel-sub{font-size:10px;color:var(--ink3);margin-bottom:12px;line-height:1.5}
+.heat-grid{display:grid;grid-template-columns:auto repeat(4,1fr);gap:3px;font-size:10px;margin-bottom:10px}
+.hg-header{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-align:center;padding:4px 2px;border-radius:3px}
+.hg-row-label{font-size:10px;color:var(--ink2);display:flex;flex-direction:column;justify-content:center;padding-right:6px;line-height:1.3}
+.hg-row-label span{font-size:9px;color:var(--ink3)}
+.hg-cell{border-radius:4px;padding:6px 4px;text-align:center;transition:background .4s}
+.hg-cell .roc-val{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;line-height:1}
+.hg-cell .roc-lbl{font-size:8px;margin-top:2px;opacity:.75}
+.bar-group{margin-bottom:10px}
+.bar-row-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;gap:8px;flex-wrap:wrap}
+.bar-row-label{font-size:11px;font-weight:600;color:var(--ink2)}
+.bar-row-total{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--ink)}
+.bar-track{height:24px;border-radius:3px;background:#252018;display:flex;overflow:hidden}
+.bar-seg{height:100%;transition:width .55s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden}
+.bar-seg.city{background:var(--city);color:#071528}
+.bar-seg.school{background:var(--school);color:#100828}
+.bar-seg.county{background:var(--county);color:#061a10}
+.bar-seg.void{background:#302820;border:1px dashed #50402a;color:var(--ink3)}
+.rate-breakdown{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.rb-item{display:flex;align-items:center;gap:5px;font-size:10px}
+.rb-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.rb-label{color:var(--ink2)}
+.rb-rate{font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-left:2px}
+.ftable{width:100%;border-collapse:collapse;font-size:11px}
+.ftable th{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:5px 8px;text-align:right;border-bottom:1px solid var(--rule)}
+.ftable th:first-child{text-align:left}
+.ftable td{padding:6px 8px;text-align:right;border-bottom:1px solid #252018;color:var(--ink2)}
+.ftable td:first-child{text-align:left;color:var(--ink);font-weight:500}
+.ftable tfoot td{border-top:1px solid var(--rule);border-bottom:none;font-weight:600;color:var(--ink)}
+.neg{color:var(--red)!important}.pos{color:var(--green)!important}
+.city-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.city-name{font-size:11px;font-weight:600;width:88px;flex-shrink:0;transition:color .3s}
+.city-bg{flex:1;height:16px;background:#252018;border-radius:3px;overflow:hidden}
+.city-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;transition:width .5s,background .3s}
+.city-stat{font-size:10px;color:var(--ink3);width:160px;flex-shrink:0;text-align:right;transition:color .3s;line-height:1.4}
+.city-divider{border:none;border-top:1px dashed var(--rule);margin:4px 0 7px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink3)}
+.ls{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.src{font-family:'Barlow Condensed',sans-serif;font-size:9px;color:var(--ink3);border-top:1px solid var(--rule);padding-top:10px;line-height:1.8;letter-spacing:.02em;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="mast">
+  <div class="kicker">Better Blocks NJ Housing Policy Series</div>
+  <h1>The Fiscal Cost of Inclusionary Zoning in Jersey City</h1>
+  <p class="deck">Every unit of housing is a tax-base event. When a mandate suppresses supply, the city, schools, and county all lose revenue. Adjust the IZO level and funding structure to see the full ledger.</p>
+</div>
+<div class="nav" id="nav">
+  <button class="nb a0" data-s="0">Unfunded Mandate<span class="nt">no PILOT · no density bonus</span></button>
+  <button class="nb" data-s="1">Upzoning + Density Bonus<span class="nt">no PILOT</span></button>
+  <button class="nb" data-s="2">Fully Funded<span class="nt">PILOT + density bonus</span></button>
+</div>
+<div class="main">
+  <div class="controls">
+    <div class="ctrl-group" id="ctrlSet">
+      <div class="ctrl-label">Affordable set-aside</div>
+      <div class="ctrl-row">
+        <input type="range" id="slSet" min="0" max="25" step="1" value="15">
+        <div class="ctrl-val" id="slSetV">15%</div>
+      </div>
+      <div class="ctrl-note">0% = no mandate · JC Ch. 187 Tier 1 = 10% · Tier 2 = 15%</div>
+    </div>
+    <div class="ctrl-group disabled" id="ctrlBonus">
+      <div class="ctrl-label">Density / height bonus<span class="disabled-tag" id="bonusDisabledTag">not available — unfunded mandate</span></div>
+      <div class="ctrl-row">
+        <input type="range" id="slBonus" min="0" max="80" step="5" value="30" disabled>
+        <div class="ctrl-val muted" id="slBonusV">30%</div>
+      </div>
+      <div class="ctrl-note">Extra units on same land — lowers per-unit land cost</div>
+    </div>
+    <div class="ctrl-group disabled" id="ctrlPilot">
+      <div class="ctrl-label">PILOT rate<span class="disabled-tag" id="pilotDisabledTag">not available — no PILOT</span></div>
+      <div class="ctrl-row">
+        <input type="range" id="slPilot" min="10" max="15" step="0.5" value="10" disabled>
+        <div class="ctrl-val muted" id="slPilotV">10%</div>
+      </div>
+      <div class="ctrl-note">NJ statutory range: 10–15% of gross rev.</div>
+    </div>
+  </div>
+  <div class="verdict" id="verdict"><div class="vh" id="vh"></div><div class="vs" id="vs"></div></div>
+  <div class="cards">
+    <div class="card"><div class="card-label">Market-Rate Units Built</div><div class="card-val" id="cv_mkt">—</div><div class="card-sub">per year · baseline 5,500</div></div>
+    <div class="card"><div class="card-label">Affordable Units Built</div><div class="card-val" id="cv_aff">—</div><div class="card-sub" id="cv_aff_sub">—</div></div>
+    <div class="card"><div class="card-label">Units Lost (DWL)</div><div class="card-val" id="cv_lost">—</div><div class="card-sub">vs. no-IZO baseline</div></div>
+    <div class="card"><div class="card-label">Annual Tax Revenue Δ</div><div class="card-val" id="cv_taxlost">—</div><div class="card-sub" id="cv_taxlost_sub">city + school + county</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">Which projects go infeasible first? — Return on cost by building type &amp; rent tier</div>
+    <div class="panel-sub">ROC at current inputs vs. target. 🔴 Infeasible · 🟡 Marginal · 🟢 Feasible. The density bonus improves ROC by spreading fixed land cost across more units.</div>
+    <div class="heat-grid" id="heatGrid"></div>
+    <div class="legend">
+      <div class="li"><div class="ls" style="background:var(--tier0)"></div>Workforce B−</div>
+      <div class="li"><div class="ls" style="background:var(--tier1)"></div>Mid-market B</div>
+      <div class="li"><div class="ls" style="background:var(--tier2)"></div>Premium A</div>
+      <div class="li"><div class="ls" style="background:var(--tier3)"></div>Luxury A+</div>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:var(--ink3);line-height:1.6" id="heat_note"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">Annual property tax revenue — baseline vs. this scenario (per 5,500-unit baseline)</div>
+    <div class="rate-breakdown">
+      <div class="rb-item"><div class="rb-dot" style="background:var(--city)"></div><span class="rb-label">City of Jersey City</span><span class="rb-rate" style="color:var(--city)">0.85%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 38% of levy</span></div>
+      <div class="rb-item"><div class="rb-dot" style="background:var(--school)"></div><span class="rb-label">JCPS Schools</span><span class="rb-rate" style="color:var(--school)">0.95%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 43% of levy</span></div>
+      <div class="rb-item"><div class="rb-dot" style="background:var(--county)"></div><span class="rb-label">Hudson County</span><span class="rb-rate" style="color:var(--county)">0.43%</span><span class="rb-label" style="color:var(--ink3);margin-left:3px">≈ 19% of levy</span></div>
+      <div class="rb-item"><div class="rb-dot" style="background:#2a2018;border:1px solid var(--ink3)"></div><span class="rb-label" style="color:var(--ink3)">Total: 2.23% · $435K assessed value/unit (JC UFB-derived)</span></div>
+    </div>
+    <div class="bar-group">
+      <div class="bar-row-head"><span class="bar-row-label">🏙️ City of Jersey City <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--city);margin-left:4px">0.85% · ~38% of levy</span></span><span class="bar-row-total" id="bt_city">—</span></div>
+      <div class="bar-track"><div class="bar-seg city" id="bs_city"></div><div class="bar-seg void" id="bv_city"></div></div>
+    </div>
+    <div class="bar-group">
+      <div class="bar-row-head"><span class="bar-row-label">🏫 Jersey City Public Schools <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--school);margin-left:4px">0.95% · ~43% of levy</span></span><span class="bar-row-total" id="bt_school">—</span></div>
+      <div class="bar-track"><div class="bar-seg school" id="bs_school"></div><div class="bar-seg void" id="bv_school"></div></div>
+    </div>
+    <div class="bar-group">
+      <div class="bar-row-head"><span class="bar-row-label">🏛️ Hudson County <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--county);margin-left:4px">0.43% · ~19% of levy</span></span><span class="bar-row-total" id="bt_county">—</span></div>
+      <div class="bar-track"><div class="bar-seg county" id="bs_county"></div><div class="bar-seg void" id="bv_county"></div></div>
+    </div>
+    <div class="legend" style="margin-top:10px">
+      <div class="li"><div class="ls" style="background:var(--city)"></div>Conventional property tax collected</div>
+      <div class="li" id="void_leg"><div class="ls" style="background:#302820;border:1px dashed #50402a"></div><span>Revenue void — units never built (DWL)</span></div>
+      <div class="li" id="pilot_leg" style="display:none"><div class="ls" style="background:var(--school);opacity:.4"></div>School &amp; county receive $0 on PILOT-abated units (NJ law)</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">Full fiscal ledger — annual revenues at scale (~5,500-unit baseline)</div>
+    <div class="panel-sub">Effective rate 2.23% of $435K assessed value = ~$9,700/unit/yr total · proportions from JC UFB levy data (2023)</div>
+    <table class="ftable">
+      <thead><tr><th>Revenue stream</th><th>Rate</th><th>No-IZO baseline</th><th id="th_sc">—</th><th>Annual Δ</th><th>10-yr Δ</th></tr></thead>
+      <tbody id="ftbody"></tbody>
+      <tfoot id="fttfoot"></tfoot>
+    </table>
+    <div style="margin-top:10px;font-size:10px;color:var(--ink3);line-height:1.6" id="table_note"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">Annual units permitted — Jersey City vs. cities with unfunded citywide IZOs</div>
+    <div class="panel-sub">Raw annual permitted units (not per capita) · Source: Better Blocks NJ (March 2026), Cambridge Day, Zillow ORI</div>
+    <div class="city-row">
+      <span class="city-name" style="color:var(--ink2)">JC baseline</span>
+      <div class="city-bg"><div class="city-fill" style="background:#3a3020;width:100%;color:var(--ink3)">~5,500/yr · no IZO</div></div>
+      <span class="city-stat">~5,500 mkt · 0 aff</span>
+    </div>
+    <div class="city-row" id="jc_proj_row">
+      <span class="city-name" id="jc_proj_name">JC projected</span>
+      <div class="city-bg"><div class="city-fill" id="jc_proj_fill"></div></div>
+      <span class="city-stat" id="jc_proj_stat">—</span>
+    </div>
+    <hr class="city-divider">
+    <div class="city-row">
+      <span class="city-name" style="color:var(--amber)">San Francisco</span>
+      <div class="city-bg"><div class="city-fill" style="background:var(--amber);width:40%;color:#1a0800">~2,200/yr</div></div>
+      <span class="city-stat">21% unfunded → cut to 12–16%</span>
+    </div>
+    <div class="city-row">
+      <span class="city-name" style="color:var(--amber)">Boston</span>
+      <div class="city-bg"><div class="city-fill" style="background:var(--amber);width:25%;color:#1a0800">~1,400/yr</div></div>
+      <span class="city-stat">17% unfunded · seeking state aid</span>
+    </div>
+    <div class="city-row">
+      <span class="city-name" style="color:var(--red)">Cambridge</span>
+      <div class="city-bg"><div class="city-fill" style="background:var(--red);width:1%;"></div></div>
+      <span class="city-stat" style="color:var(--red)">5 units 2023 · 20% unfunded</span>
+    </div>
+    <div class="city-row">
+      <span class="city-name" style="color:var(--red)">New Haven</span>
+      <div class="city-bg"><div class="city-fill" style="background:var(--red);width:0.5%;"></div></div>
+      <span class="city-stat" style="color:var(--red)">0 IZO units 4 yrs · 15% unfunded</span>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:var(--ink3);line-height:1.6">
+      Boston has 2.2× JC's population and 6× the land area — and builds roughly a quarter as much. Cambridge produced 5 total units citywide in 2023, zero affordable, under a 20% unfunded IZO. New Haven's IZO has produced zero affordable units in four years. Downtown JC's existing 15% unfunded partial IZO has produced zero market-rate starts without PILOT support — 177 Grand St. received a multi-million-dollar PILOT to remain viable.
+    </div>
+  </div>
+  <div class="src">
+    Sources: Better Blocks NJ mandate cost model · NW Financial independent audit, 177 Grand St. (Oct 2025) · JC UFB-5/UFB-6 PILOT data (rate breakdown: city ~0.85% / school ~0.95% / county ~0.43%, derived from 2023 User Friendly Budget levy proportions) · NJ S-2 (2018) school funding reform · JC 2024 effective tax rate 2.233% · Assessed value proxy: hard cost × 1.45 LS = $435K/unit baseline; density bonus lowers effective land cost per unit · PILOT: 10–15% of gross revenue + 1.8% surcharge, city share only under NJ law · UHAC N.J.A.C. 5:80-26.4 · HUD FY2025 JC-Newark MSA income limits · ROC model: VAC=5%, OPEX=20%, conv. tax=2.0% of total cost · Phillips/Terner Center (2024) · Cambridge Day (2023) · Better Blocks NJ Part IV (March 2026)
+  </div>
+</div>
+<script>
+const HUD2025={1:79800,2:91200,3:102550,4:115450,5:124700,6:133950};
+const HH_SIZE={st:1,br1:2,br2:3,br3:5};
+const VAC=0.05,OPEX=0.20,A=(1-VAC)*(1-OPEX);
+const CONV_TAX_RATE=0.020,PILOT_SURCHARGE=0.018;
+const TIERS=[
+  {id:0,name:'Workforce',cls:'B−',color:'var(--tier0)',st:1900,br1:2400,br2:3000,br3:3600,hc:255000,rocTgt:0.055},
+  {id:1,name:'Mid-market',cls:'B',color:'var(--tier1)',st:2600,br1:3200,br2:4100,br3:5000,hc:300000,rocTgt:0.055},
+  {id:2,name:'Premium',cls:'A',color:'var(--tier2)',st:3200,br1:4000,br2:5200,br3:6200,hc:340000,rocTgt:0.057},
+  {id:3,name:'Luxury',cls:'A+',color:'var(--tier3)',st:4000,br1:5000,br2:6500,br3:7800,hc:420000,rocTgt:0.060},
+];
+const REGIMES=[
+  {name:'Low-rise', baseUnits:60,  hcMult:0.85, label:'5–7 stories'},
+  {name:'Mid-rise', baseUnits:120, hcMult:1.00, label:'8–15 stories'},
+  {name:'High-rise',baseUnits:350, hcMult:1.40, label:'25–40 stories'},
+];
+const AFF_MIX={st:0.10,br1:0.10,br2:0.60,br3:0.20};
+const MKT_MIX={st:0.15,br1:0.50,br2:0.25,br3:0.10};
+function uhacRent(br,pct){return HUD2025[HH_SIZE[br]]*pct*0.30/12;}
+function blendedUHAC(br){return uhacRent(br,0.30)*0.13+uhacRent(br,0.50)*0.37+uhacRent(br,0.60)*0.50;}
+const affBlend=AFF_MIX.st*blendedUHAC('st')+AFF_MIX.br1*blendedUHAC('br1')+AFF_MIX.br2*blendedUHAC('br2')+AFF_MIX.br3*blendedUHAC('br3');
+function mktBlend(ti){const t=TIERS[ti];return MKT_MIX.st*t.st+MKT_MIX.br1*t.br1+MKT_MIX.br2*t.br2+MKT_MIX.br3*t.br3;}
+const BASE_LS=1.45,LAND_PORTION=BASE_LS-1.0;
+function effectiveLS(bon){return bon<=0?BASE_LS:1.0+LAND_PORTION/(1+bon/100);}
+function computeROC(ti,ri,sp,hasPilot,pr,bon){
+  const tier=TIERS[ti],reg=REGIMES[ri];
+  const hc=tier.hc*reg.hcMult;
+  const N=Math.round(reg.baseUnits*(1+bon/100));
+  const ls=effectiveLS(bon);
+  const totalCost=hc*ls*N,convTax=totalCost*CONV_TAX_RATE;
+  const affN=Math.round(N*sp),mktN=N-affN;
+  const GPR=(mktN*mktBlend(ti)+affN*affBlend)*12;
+  const tax=hasPilot?(pr+PILOT_SURCHARGE)*GPR:convTax;
+  return{ROC:(GPR*A-tax)/totalCost,N,affN,mktN,totalCost,convTax,GPR,ls};
+}
+const RATE_CITY=0.00850,RATE_SCHOOL=0.00950,RATE_COUNTY=0.00433;
+const AV_PER_UNIT=435000;
+const TAX_CITY=AV_PER_UNIT*RATE_CITY,TAX_SCHOOL=AV_PER_UNIT*RATE_SCHOOL,TAX_COUNTY=AV_PER_UNIT*RATE_COUNTY;
+const TAX_TOTAL=TAX_CITY+TAX_SCHOOL+TAX_COUNTY;
+const BASE=5500;
+const TIER_SHARE=[0.15,0.50,0.25,0.10];
+function estimateDWL(sp,sc,bon,pr){
+  if(sp===0){
+    const extraFrac=(sc===1||sc===2)?bon/100:0;
+    return{totalLost:0,totalAff:0,totalMkt:Math.round(BASE*(1+extraFrac))};
+  }
+  const hasPilot=sc===2;
+  const effectiveBon=sc===0?0:bon;
+  const effectivePr=hasPilot?pr:0;
+  let totalLost=0,totalAff=0,totalMkt=0;
+  TIERS.forEach((tier,ti)=>{
+    const r=computeROC(ti,1,sp/100,hasPilot,effectivePr,effectiveBon);
+    const ratio=r.ROC/tier.rocTgt;
+    let feasProb;
+    if(ratio>=1.05)feasProb=1.00;
+    else if(ratio>=1.00)feasProb=0.85;
+    else if(ratio>=0.90)feasProb=0.40;
+    else if(ratio>=0.80)feasProb=0.10;
+    else feasProb=0.02;
+    const tierBase=Math.round(BASE*TIER_SHARE[ti]);
+    const tierPotential=sc===0?tierBase:Math.round(tierBase*(1+effectiveBon/100));
+    const built=Math.round(tierPotential*feasProb);
+    totalLost+=tierPotential-built;
+    totalAff+=Math.round(built*sp/100);
+    totalMkt+=built-Math.round(built*sp/100);
+  });
+  return{totalLost,totalAff,totalMkt};
+}
+function computeFiscal(totalMkt,totalAff,sc,pr){
+  const hasPilot=sc===2,GROSS_REV_UNIT=38400,built=totalMkt+totalAff;
+  let cityRev,schoolRev,countyRev;
+  if(!hasPilot){
+    cityRev=built*TAX_CITY;schoolRev=built*TAX_SCHOOL;countyRev=built*TAX_COUNTY;
+  }else{
+    const pU=Math.round(built*0.70),cU=built-pU,rate=pr+PILOT_SURCHARGE;
+    cityRev=pU*GROSS_REV_UNIT*rate+cU*TAX_CITY;
+    schoolRev=cU*TAX_SCHOOL;countyRev=cU*TAX_COUNTY;
+  }
+  return{cityRev,schoolRev,countyRev,
+    baseCity:BASE*TAX_CITY,baseSchool:BASE*TAX_SCHOOL,baseCounty:BASE*TAX_COUNTY};
+}
+const fmt$=n=>'$'+Math.round(n).toLocaleString();
+const fmtM=n=>n>=1e6?'$'+(n/1e6).toFixed(1)+'M':'$'+Math.round(n/1000)+'K';
+function updateSliderState(sc){
+  const bonusGroup=document.getElementById('ctrlBonus');
+  const pilotGroup=document.getElementById('ctrlPilot');
+  const bonusSlider=document.getElementById('slBonus');
+  const pilotSlider=document.getElementById('slPilot');
+  const bonusVal=document.getElementById('slBonusV');
+  const pilotVal=document.getElementById('slPilotV');
+  const bonusTag=document.getElementById('bonusDisabledTag');
+  const pilotTag=document.getElementById('pilotDisabledTag');
+  const bonusActive=sc===1||sc===2;
+  const pilotActive=sc===2;
+  bonusGroup.classList.toggle('disabled',!bonusActive);
+  bonusSlider.disabled=!bonusActive;
+  bonusVal.classList.toggle('muted',!bonusActive);
+  bonusTag.style.display=bonusActive?'none':'inline';
+  pilotGroup.classList.toggle('disabled',!pilotActive);
+  pilotSlider.disabled=!pilotActive;
+  pilotVal.classList.toggle('muted',!pilotActive);
+  pilotTag.style.display=pilotActive?'none':'inline';
+  if(!pilotActive)pilotTag.textContent=sc===0?'not available — unfunded mandate':'not available — no PILOT';
+}
+function renderHeatGrid(sp,sc,bon,pr){
+  const hasPilot=sc===2;
+  const effectiveBon=sc===0?0:bon;
+  const effectivePr=hasPilot?pr:0;
+  let html='<div></div>';
+  TIERS.forEach(t=>{html+=`<div class="hg-header" style="color:${t.color}">${t.name}<br><span style="font-size:8px;opacity:.6">${t.cls}</span></div>`;});
+  REGIMES.forEach((reg,ri)=>{
+    html+=`<div class="hg-row-label">${reg.name}<span>${reg.label}</span></div>`;
+    TIERS.forEach((_,ti)=>{
+      const r=computeROC(ti,ri,sp/100,hasPilot,effectivePr,effectiveBon);
+      const rocTgt=TIERS[ti].rocTgt,ratio=r.ROC/rocTgt;
+      const rp=(r.ROC*100).toFixed(1),tp=(rocTgt*100).toFixed(1);
+      let bg,tc,lbl;
+      if(ratio>=1.05){bg='#0c2a14';tc='#5acc7a';lbl='Feasible';}
+      else if(ratio>=1.00){bg='#1a2a0c';tc='#8acc48';lbl='At target';}
+      else if(ratio>=0.90){bg='#2a1e04';tc='#c89030';lbl='Marginal';}
+      else if(ratio>=0.80){bg='#280c04';tc='#c85030';lbl='Infeasible';}
+      else{bg='#1e0404';tc='#c03020';lbl='Collapsed';}
+      html+=`<div class="hg-cell" style="background:${bg}"><div class="roc-val" style="color:${tc}">${rp}%</div><div class="roc-lbl" style="color:${tc}">tgt ${tp}% · ${lbl}</div></div>`;
+    });
+  });
+  document.getElementById('heatGrid').innerHTML=html;
+  const lsEff=effectiveLS(effectiveBon).toFixed(2);
+  let note;
+  if(sp===0)note='No affordable mandate — all projects fully feasible. Zero deadweight loss; full conventional tax revenue flows to city, schools, and county.';
+  else if(sc===0)note=`At ${sp}% unfunded (no bonus, land+soft mult. ${BASE_LS}×), Workforce B− and Mid-market B are first to become infeasible. This mirrors downtown JC's experience: the existing 15% unfunded zone has produced zero market-rate starts without PILOT support.`;
+  else if(sc===1)note=`A ${bon}% density bonus reduces effective land+soft cost from ${BASE_LS}× to ${lsEff}× per unit — the same land amortised across more units, directly improving ROC. Workforce B− remains most vulnerable.`;
+  else note=`PILOT + ${bon}% density bonus: effective land+soft cost falls to ${lsEff}×, PILOT replaces conventional tax with a lower payment, freeing up NOI. Together these restore most tiers to feasibility. Residual DWL reflects projects that can't secure a PILOT — bespoke negotiations take time and political capital.`;
+  document.getElementById('heat_note').textContent=note;
+}
+let curSc=0;
+function render(){
+  const sp=parseInt(document.getElementById('slSet').value);
+  const bonusPct=parseInt(document.getElementById('slBonus').value);
+  const pilotRate=parseFloat(document.getElementById('slPilot').value);
+  const sc=curSc;
+  const noMandate=sp===0;
+  const effectiveBon=sc===0?0:bonusPct;
+  const effectivePr=sc===2?pilotRate/100:0;
+  const{totalLost,totalAff,totalMkt}=estimateDWL(sp,sc,effectiveBon,effectivePr);
+  const totalBuilt=totalMkt+totalAff;
+  const{cityRev,schoolRev,countyRev,baseCity,baseSchool,baseCounty}=computeFiscal(totalMkt,totalAff,sc,effectivePr);
+  const baseTot=baseCity+baseSchool+baseCounty,scenTot=cityRev+schoolRev+countyRev,deltaTot=scenTot-baseTot;
+  const scLabel=['Unfunded Mandate','Upzoning + Bonus','PILOT + Bonus'][sc];
+  let verdictClass,vh,vs;
+  if(noMandate){
+    verdictClass='vn';
+    vh='No affordable mandate — maximum supply, full tax base.';
+    vs=sc===2?'With no inclusionary requirement, PILOTs still shift revenue from schools and county to the city on abated projects. No supply suppression from a mandate, but the fiscal distribution changes.'
+      :`With no inclusionary requirement${sc===1&&effectiveBon>0?` and a ${effectiveBon}% density bonus adding units above baseline,`:','} all projects remain fully feasible. Zero deadweight loss.`;
+  }else if(sc===0){
+    verdictClass='v0';
+    vh=`An unfunded ${sp}% mandate suppresses the supply that funds JC's schools and services.`;
+    vs=`With no PILOT and no density bonus, mid-market and workforce projects cannot clear their return-on-cost targets and don't get built. Downtown JC's existing 15% unfunded partial IZO has produced zero market-rate starts without PILOT support. Every unit that doesn't get built is a property tax payment the city, schools, and county never receive.`;
+  }else if(sc===1){
+    verdictClass='v1';
+    vh=`Upzoning and density bonuses recover some supply — but not enough to close the fiscal gap.`;
+    vs=`A ${effectiveBon}% density bonus lowers effective land cost per unit from ${BASE_LS}× to ${effectiveLS(effectiveBon).toFixed(2)}×, improving ROC and pulling some marginal projects back to feasibility. Mid-market B projects remain marginal or infeasible without a PILOT. Net DWL is reduced but not eliminated.`;
+  }else{
+    verdictClass='v2';
+    vh=`A PILOT + density bonus restores most supply — but diverts revenue from schools and the county.`;
+    vs=`PILOT agreements keep projects feasible and supply near baseline. However, PILOT payments flow to the city only under NJ law — schools and the county receive their conventional levy share only from the ~30% of units not under PILOT.`;
+  }
+  document.getElementById('verdict').className=`verdict ${verdictClass}`;
+  document.getElementById('vh').textContent=vh;
+  document.getElementById('vs').textContent=vs;
+  const unitCol=noMandate?'var(--green)':sc===0?'var(--red)':sc===1?'var(--amber)':'var(--green)';
+  document.getElementById('cv_mkt').textContent='~'+totalMkt.toLocaleString();
+  document.getElementById('cv_mkt').style.color=unitCol;
+  document.getElementById('cv_aff').textContent=noMandate?'0':'~'+totalAff.toLocaleString();
+  document.getElementById('cv_aff').style.color=noMandate?'var(--ink3)':unitCol;
+  document.getElementById('cv_aff_sub').textContent=noMandate?'no mandate':`goal: ${Math.round(BASE*sp/100).toLocaleString()} · gap: ${(Math.round(BASE*sp/100)-totalAff).toLocaleString()} short`;
+  document.getElementById('cv_lost').textContent=noMandate?'0':'~'+totalLost.toLocaleString();
+  document.getElementById('cv_lost').style.color=noMandate||totalLost===0?'var(--green)':'var(--red)';
+  document.getElementById('cv_taxlost').textContent=fmtM(Math.abs(deltaTot));
+  document.getElementById('cv_taxlost').style.color=deltaTot<-1000?'var(--red)':deltaTot>1000?'var(--green)':'var(--ink2)';
+  document.getElementById('cv_taxlost_sub').textContent=deltaTot<0?'annual shortfall vs. no-IZO baseline':'above no-IZO baseline';
+  renderHeatGrid(sp,sc,effectiveBon,effectivePr);
+  function setBar(bId,vId,tId,collected,base){
+    const cp=Math.min(100,collected/base*100),lp=Math.max(0,Math.min(100-cp,(base-collected)/base*100));
+    document.getElementById(bId).style.width=cp+'%';
+    document.getElementById(bId).textContent=cp>20?Math.round(cp)+'% of baseline':'';
+    document.getElementById(vId).style.width=lp+'%';
+    document.getElementById(vId).textContent=lp>10?'−'+Math.round(lp)+'%':'';
+    document.getElementById(tId).textContent=fmtM(collected)+'/yr ('+Math.round(collected/base*100)+'% of baseline)';
+  }
+  setBar('bs_city','bv_city','bt_city',cityRev,baseCity);
+  setBar('bs_school','bv_school','bt_school',schoolRev,baseSchool);
+  setBar('bs_county','bv_county','bt_county',countyRev,baseCounty);
+  document.getElementById('pilot_leg').style.display=sc===2?'flex':'none';
+  document.getElementById('void_leg').style.display=sc===2?'none':'flex';
+  document.getElementById('th_sc').textContent=scLabel;
+  const rows=[
+    {label:'City of Jersey City',rate:'0.85%',base:baseCity,scen:cityRev},
+    {label:'JCPS (schools)',rate:'0.95%',base:baseSchool,scen:schoolRev},
+    {label:'Hudson County',rate:'0.43%',base:baseCounty,scen:countyRev},
+  ];
+  document.getElementById('ftbody').innerHTML=rows.map(r=>{
+    const d=r.scen-r.base;
+    return`<tr><td>${r.label}</td><td style="color:var(--ink3)">${r.rate}</td><td>${fmtM(r.base)}/yr</td><td>${fmtM(r.scen)}/yr</td><td class="${d<-100?'neg':d>100?'pos':''}">${d<0?'−':'+'}${fmtM(Math.abs(d))}/yr</td><td class="${d<-100?'neg':d>100?'pos':''}">${d<0?'−':'+'}${fmtM(Math.abs(d*10))}</td></tr>`;
+  }).join('');
+  document.getElementById('fttfoot').innerHTML=`<tr><td>Total</td><td style="color:var(--ink3)">2.23%</td><td>${fmtM(baseTot)}/yr</td><td>${fmtM(scenTot)}/yr</td><td class="${deltaTot<-100?'neg':deltaTot>100?'pos':''}">${deltaTot<0?'−':'+'}${fmtM(Math.abs(deltaTot))}/yr</td><td class="${deltaTot<-100?'neg':deltaTot>100?'pos':''}">${deltaTot<0?'−':'+'}${fmtM(Math.abs(deltaTot*10))}</td></tr>`;
+  const pilotNote=sc===2?` PILOT note: ~70% of built units assumed abated. Payments (~${(pilotRate+1.8).toFixed(1)}% of gross revenue) flow to city only. Schools lose ~${fmtM(Math.round(totalBuilt*0.70)*TAX_SCHOOL)}/yr; county loses ~${fmtM(Math.round(totalBuilt*0.70)*TAX_COUNTY)}/yr vs. full conventional tax.`:'';
+  document.getElementById('table_note').textContent=`$435K assessed value/unit × 2.23% = ~${fmt$(Math.round(TAX_TOTAL))}/unit/yr. Proportions from JC UFB levy data (2023).${pilotNote}`;
+  const scColor=noMandate?'var(--green)':sc===0?'var(--red)':sc===1?'var(--amber)':'var(--green)';
+  const pct=Math.min(100,totalBuilt/BASE*100);
+  document.getElementById('jc_proj_name').style.color=scColor;
+  document.getElementById('jc_proj_fill').style.background=scColor;
+  document.getElementById('jc_proj_fill').style.color=sc===0?'#1a0000':sc===1?'#1a0800':'#061a10';
+  document.getElementById('jc_proj_fill').style.width=pct+'%';
+  document.getElementById('jc_proj_fill').textContent=pct>15?`~${totalBuilt.toLocaleString()}/yr (${scLabel})`:'';
+  document.getElementById('jc_proj_stat').style.color=scColor;
+  const affLine=noMandate?'0 aff (no mandate)':`~${totalAff.toLocaleString()} aff · ~${totalMkt.toLocaleString()} mkt`;
+  document.getElementById('jc_proj_stat').innerHTML=`~${totalBuilt.toLocaleString()}/yr<br><span style="font-size:9px;color:var(--ink3)">${affLine}</span>`;
+}
+document.getElementById('slSet').addEventListener('input',e=>{document.getElementById('slSetV').textContent=e.target.value+'%';render();});
+document.getElementById('slBonus').addEventListener('input',e=>{document.getElementById('slBonusV').textContent=e.target.value+'%';render();});
+document.getElementById('slPilot').addEventListener('input',e=>{document.getElementById('slPilotV').textContent=parseFloat(e.target.value).toFixed(1)+'%';render();});
+document.querySelectorAll('.nb').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const sc=parseInt(btn.dataset.s);if(sc===curSc)return;curSc=sc;
+    document.querySelectorAll('.nb').forEach((b,i)=>b.className='nb'+(i===sc?` a${sc}`:''));
+    updateSliderState(sc);render();
+  });
+});
+updateSliderState(0);
+render();
+</script>
+</body>
+</html>
