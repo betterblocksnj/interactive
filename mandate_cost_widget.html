@@ -135,6 +135,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .pilot-on{background:#E6F1FB;color:#0C447C}.pilot-off{background:#FAEEDA;color:#854F0B}
 .stat-note{font-size:11px;margin:3px 0 0;line-height:1.4;opacity:.8}
 .reset-btn{font-size:11px;color:#185FA5;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;margin-left:6px;font-family:inherit}
+.feas-pill{display:inline-flex;align-items:center;gap:7px;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:500;margin-bottom:12px;width:100%}
+.feas-pill.feasible{background:#EAF3DE;color:#27500A;border:.5px solid #97C459}
+.feas-pill.marginal{background:#FAEEDA;color:#633806;border:.5px solid #EF9F27}
+.feas-pill.infeasible{background:#FCEBEB;color:#791F1F;border:.5px solid #F09595}
+.feas-pill.none{background:var(--color-background-secondary);color:var(--color-text-secondary);border:.5px solid var(--color-border-tertiary)}
+.feas-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.feasible .feas-dot{background:#3B6D11}
+.marginal .feas-dot{background:#BA7517}
+.infeasible .feas-dot{background:#A32D2D}
+.none .feas-dot{background:#aaa}
 .sl-desc{font-size:11px;color:var(--color-text-tertiary);margin:-6px 0 10px;line-height:1.5;padding-left:202px}
 .attribution{font-size:11px;color:#888;margin-top:24px;padding-top:12px;border-top:.5px solid #e0e0e0;line-height:1.6}
 .attribution a{color:#185FA5}
@@ -202,6 +212,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <p class="sl-note" id="rocNote">Default for mid-rise (5.5%). Drag to model different investor hurdle rates. Strong markets like Jersey City typically support a 5.5–6% target; softer markets require higher returns to attract capital.</p>
 <div id="costBar"></div>
 
+<div id="feasPill"></div>
 <div class="hr"></div>
 <p class="sec">Market rent tier — actual JC rents (2025)</p>
 <div class="tier-grid" id="tierGrid"></div>
@@ -433,6 +444,7 @@ function go(){
   else if(status==='round_up'){calcHtml=`<div class="aff-calc round-up"><strong>${affN} affordable units required</strong> (${N} × ${Math.round(sp*100)}% = ${exact.toFixed(2)} → fraction ${frac.toFixed(2)} ≥ 0.5, <strong>rounded up</strong> per JC IZO Ch. 187) · ${mktN} market-rate units. No trust fund payment.</div>`;}
   else{calcHtml=`<div class="aff-calc trust-fund"><strong>${affN} affordable units required</strong> (${N} × ${Math.round(sp*100)}% = ${exact.toFixed(2)} → fraction ${frac.toFixed(2)} &lt; 0.5, rounded down) · ${mktN} market-rate units.<br>⚠️ <strong>Trust fund payment required: ${fmt$(payment)}</strong> (pro-rata $180K/unit, min $36K per JC IZO Ch. 187 → Jersey City Affordable Housing Trust Fund).</div>`;}
   document.getElementById('affCalc').innerHTML=calcHtml;
+
   const[,defaultHC,regimeTgtROC,bname]=getRegime(N);
   // ROC target: use slider value if user has moved it, otherwise regime default
   if(userROC===null) document.getElementById('sROC').value=(regimeTgtROC*100).toFixed(1);
@@ -496,6 +508,44 @@ function go(){
   const A=(1-VAC)*(1-OPEX);
   const bkRent=totalCost>0&&N>0?(totalCost*tgtROC+convTax)/(A*N*12):0;
   const aboveBK=mktBlend>=bkRent;
+  
+  // ── Feasibility pill ─────────────────────────────────────────────────────
+  // Compute a quick ROC using current state (rC computed later — do it here too)
+  {
+    const _tc=hc*ls*N, _convTax=_tc*0.020, _tNOI=_tc*tgtROC;
+    const _PF=is100?0:.10, _PC=.15;
+    const _pr=hasPilot?Math.max(_PF,Math.min(gv('sPilot')/100,_PC)):0;
+    const _raw=[gv('mSt'),gv('m1'),gv('m2'),gv('m3')];
+    const _tot=_raw.reduce((a,b)=>a+b,0)||100;
+    const [_mPSt,_mP1,_mP2,_mP3]=_raw.map(v=>v/_tot*100);
+    const _mb=_mPSt/100*t.st+_mP1/100*t.br1+_mP2/100*t.br2+_mP3/100*t.br3;
+    const {st:_aPSt,a2:_aP2,a3:_aP3,a2forCalc:_a2fc}=getAffMix();
+    const _ab=(_aPSt/100*0.5)*blendedUHAC('st')+(_aPSt/100*0.5)*blendedUHAC('br1')+_a2fc/100*blendedUHAC('br2')+_aP3/100*blendedUHAC('br3');
+    const {affN:_aN,mktN:_mN}=calcAffUnits(N,sp);
+    const _GPR=_mN*_mb*12+_aN*_ab*12;
+    const _tax=hasPilot?(_pr+0.018)*_GPR:_convTax;
+    const _ROC=(_GPR*(1-VAC)*(1-OPEX)-_tax)/_tc;
+    const _gap=_ROC-tgtROC;
+    let pillCls, pillDot, pillMsg;
+    if(isZero){
+      if(_ROC>=tgtROC){pillCls='feasible';pillMsg='Likely feasible — no affordable mandate, return on cost above target';}
+      else if(_ROC>=tgtROC*0.85){pillCls='marginal';pillMsg='Marginal — no affordable mandate, but return on cost is near the threshold; project may pencil with a negotiated PILOT';}
+      else{pillCls='infeasible';pillMsg='Not feasible without subsidy — return on cost below target even without an affordable mandate';}
+    } else if(is100){
+      pillCls='infeasible';pillMsg='Not feasible without significant subsidy — 100% affordable with no market-rate cross-subsidy';
+    } else if(_ROC>=tgtROC){
+      pillCls='feasible';pillMsg='Likely feasible — return on cost meets target at current inputs'+(hasPilot?' with PILOT':' without PILOT');
+    } else if(_ROC>=tgtROC*0.85){
+      pillCls='marginal';pillMsg='Marginal — return on cost is close to target; project may pencil with a negotiated PILOT';
+    } else {
+      pillCls='infeasible';
+      pillMsg=hasPilot
+        ?'Not feasible — return on cost below target even with a PILOT; mandate cost exceeds what the PILOT can offset'
+        :'Not feasible without subsidy — return on cost below target; a PILOT or lower costs are needed for this project to break ground';
+    }
+    const _pill=document.getElementById('feasPill');if(_pill)_pill.innerHTML='<div class="feas-pill '+pillCls+'"><span class="feas-dot"></span>'+pillMsg+'</div>';
+  }
+
   document.getElementById('berentBar').innerHTML=`<div class="berent">Break-even blended rent (no mandate, no PILOT): <strong>${fmt$(Math.round(bkRent))}/mo</strong> avg. Current blended market rent: <strong>${fmt$(Math.round(mktBlend))}/mo</strong>. ${aboveBK?`Above break-even by ${fmt$(Math.round(mktBlend-bkRent))}/mo.`:`Below break-even by ${fmt$(Math.round(bkRent-mktBlend))}/mo — PILOT needed before mandate.`}</div>`;
   const PF=is100?0:.10,PC=.15;
   // Auto-peg once when PILOT is first enabled; user can adjust freely after
