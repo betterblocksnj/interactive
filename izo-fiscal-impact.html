@@ -235,7 +235,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
     </div>
   </div>
   <div class="src">
-    Sources: Better Blocks NJ mandate cost model · NW Financial independent audit, 177 Grand St. (Oct 2025) · JC UFB-5/UFB-6 PILOT data (rate breakdown: city ~0.85% / school ~0.95% / county ~0.43%, derived from 2023 User Friendly Budget levy proportions) · NJ S-2 (2018) school funding reform · JC 2024 effective tax rate 2.233% · Assessed value proxy: hard cost × 1.45 LS = $435K/unit baseline; density bonus lowers effective land cost per unit · PILOT: 10–15% of gross revenue + 1.8% surcharge, city share only under NJ law · UHAC N.J.A.C. 5:80-26.4 · HUD FY2025 JC-Newark MSA income limits · ROC model: VAC=5%, OPEX=20%, conv. tax=2.0% of total cost · Phillips/Terner Center (2024) · Cambridge Day (2023) · Better Blocks NJ Part IV (March 2026)
+    Sources: Better Blocks NJ mandate cost model · NW Financial independent audit, 177 Grand St. (Oct 2025) · JC UFB-5/UFB-6 PILOT data (rate breakdown: city ~0.85% / school ~0.95% / county ~0.43%, derived from 2023 User Friendly Budget levy proportions) · NJ S-2 (2018) school funding reform · JC 2024 effective tax rate 2.233% · Assessed value proxy: hard cost × 1.45 LS = $435K/unit baseline; density bonus lowers effective land cost per unit · PILOT: 10–15% of gross revenue + 1.8% surcharge, city share only under NJ law · UHAC N.J.A.C. 5:80-26.4 · HUD FY2025 JC-Newark MSA income limits · ROC model: VAC=5%, OPEX=20%, conv. tax=2.0% of total cost · Feasibility model: sigmoid function (k=18, mid=0.960) × entry penalty by tier; baseline feasibility: Workforce B− 5% (not built in JC without subsidy), others 100% · Discontinuity at sp>0 modeled via entry penalties: Mid-market 50% (UHAC cross-subsidy gap of $2,683/mo per affordable unit requires ~8.5% market rent surcharge Class B cannot bear), Premium 88%, Luxury 95% · Phillips/Terner Center (2024) · Cambridge Day (2023) · Better Blocks NJ Part IV (March 2026)
   </div>
 </div>
 <script>
@@ -243,16 +243,20 @@ const HUD2025={1:79800,2:91200,3:102550,4:115450,5:124700,6:133950};
 const HH_SIZE={st:1,br1:2,br2:3,br3:5};
 const VAC=0.05,OPEX=0.20,A=(1-VAC)*(1-OPEX);
 const CONV_TAX_RATE=0.020,PILOT_SURCHARGE=0.018;
+// Sigmoid feasibility curve — models smooth relationship between ROC ratio and build probability
+// Replaces discrete step function; captures discontinuity at sp>0 via entry penalty
+function sigmoidFeas(ratio){return 1.0/(1.0+Math.exp(-18*(ratio-0.960)));}
+
 const TIERS=[
-  {id:0,name:'Workforce',cls:'B−',color:'var(--tier0)',st:1900,br1:2400,br2:3000,br3:3600,hc:255000,rocTgt:0.055},
-  {id:1,name:'Mid-market',cls:'B',color:'var(--tier1)',st:2600,br1:3200,br2:4100,br3:5000,hc:300000,rocTgt:0.055},
-  {id:2,name:'Premium',cls:'A',color:'var(--tier2)',st:3200,br1:4000,br2:5200,br3:6200,hc:340000,rocTgt:0.057},
-  {id:3,name:'Luxury',cls:'A+',color:'var(--tier3)',st:4000,br1:5000,br2:6500,br3:7800,hc:420000,rocTgt:0.060},
+  {id:0,name:'Workforce',cls:'B−',color:'var(--tier0)',st:1900,br1:2400,br2:3000,br3:3600,hc:255000,rocTgt:0.055,baseFeas:0.05,entry:0.50},
+  {id:1,name:'Mid-market',cls:'B',color:'var(--tier1)',st:2600,br1:3200,br2:4100,br3:5000,hc:300000,rocTgt:0.052,baseFeas:1.00,entry:0.50},
+  {id:2,name:'Premium',cls:'A',color:'var(--tier2)',st:3200,br1:4000,br2:5200,br3:6200,hc:340000,rocTgt:0.057,baseFeas:1.00,entry:0.88},
+  {id:3,name:'Luxury',cls:'A+',color:'var(--tier3)',st:4000,br1:5000,br2:6500,br3:7800,hc:420000,rocTgt:0.060,baseFeas:1.00,entry:0.95},
 ];
 const REGIMES=[
-  {name:'Low-rise', baseUnits:60,  hcMult:0.85, label:'5–7 stories'},
+  {name:'Low-rise', baseUnits:60,  hcMult:0.95, label:'5–7 stories'},
   {name:'Mid-rise', baseUnits:120, hcMult:1.00, label:'8–15 stories'},
-  {name:'High-rise',baseUnits:350, hcMult:1.40, label:'25–40 stories'},
+  {name:'High-rise',baseUnits:350, hcMult:1.00, label:'25–40 stories'},
 ];
 const AFF_MIX={st:0.10,br1:0.10,br2:0.60,br3:0.20};
 const MKT_MIX={st:0.15,br1:0.50,br2:0.25,br3:0.10};
@@ -291,12 +295,8 @@ function estimateDWL(sp,sc,bon,pr){
   TIERS.forEach((tier,ti)=>{
     const r=computeROC(ti,1,sp/100,hasPilot,effectivePr,effectiveBon);
     const ratio=r.ROC/tier.rocTgt;
-    let feasProb;
-    if(ratio>=1.05)feasProb=1.00;
-    else if(ratio>=1.00)feasProb=0.85;
-    else if(ratio>=0.90)feasProb=0.40;
-    else if(ratio>=0.80)feasProb=0.10;
-    else feasProb=0.02;
+    // Sigmoid feasibility × entry penalty (discontinuity at sp>0)
+    const feasProb=sp===0?tier.baseFeas:sigmoidFeas(ratio)*tier.entry;
     const tierBase=Math.round(BASE*TIER_SHARE[ti]);
     const tierPotential=sc===0?tierBase:Math.round(tierBase*(1+effectiveBon/100));
     const built=Math.round(tierPotential*feasProb);
@@ -350,15 +350,16 @@ function renderHeatGrid(sp,sc,bon,pr){
   TIERS.forEach(t=>{html+=`<div class="hg-header" style="color:${t.color}">${t.name}<br><span style="font-size:8px;opacity:.6">${t.cls}</span></div>`;});
   REGIMES.forEach((reg,ri)=>{
     html+=`<div class="hg-row-label">${reg.name}<span>${reg.label}</span></div>`;
-    TIERS.forEach((_,ti)=>{
+    TIERS.forEach((tier,ti)=>{
       const r=computeROC(ti,ri,sp/100,hasPilot,effectivePr,effectiveBon);
       const rocTgt=TIERS[ti].rocTgt,ratio=r.ROC/rocTgt;
       const rp=(r.ROC*100).toFixed(1),tp=(rocTgt*100).toFixed(1);
+      const sig=sp===0?tier.baseFeas:sigmoidFeas(ratio)*tier.entry;
       let bg,tc,lbl;
-      if(ratio>=1.05){bg='#d4f0e0';tc='#1a6e3a';lbl='Feasible';}
-      else if(ratio>=1.00){bg='#e0f0c8';tc='#3a6010';lbl='At target';}
-      else if(ratio>=0.90){bg='#faebd0';tc='#7a4a00';lbl='Marginal';}
-      else if(ratio>=0.80){bg='#fdddd8';tc='#8a1a08';lbl='Infeasible';}
+      if(sig>=0.80){bg='#d4f0e0';tc='#1a6e3a';lbl='Feasible';}
+      else if(sig>=0.55){bg='#e0f0c8';tc='#3a6010';lbl='At target';}
+      else if(sig>=0.25){bg='#faebd0';tc='#7a4a00';lbl='Marginal';}
+      else if(sig>=0.08){bg='#fdddd8';tc='#8a1a08';lbl='Infeasible';}
       else{bg='#f8ccc8';tc='#7a1010';lbl='Collapsed';}
       html+=`<div class="hg-cell" style="background:${bg}"><div class="roc-val" style="color:${tc}">${rp}%</div><div class="roc-lbl" style="color:${tc}">Target ${tp}% · ${lbl}</div></div>`;
     });
