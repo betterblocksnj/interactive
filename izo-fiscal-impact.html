@@ -145,7 +145,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
   <div class="cards">
     <div class="card"><div class="card-label">Market-Rate Units Built</div><div class="card-val" id="cv_mkt">—</div><div class="card-sub">per year · baseline 5,500</div></div>
     <div class="card"><div class="card-label">Affordable Units Built</div><div class="card-val" id="cv_aff">—</div><div class="card-sub" id="cv_aff_sub">—</div></div>
-    <div class="card"><div class="card-label">Units Lost (DWL)</div><div class="card-val" id="cv_lost">—</div><div class="card-sub">vs. no-IZO baseline</div></div>
+    <div class="card"><div class="card-label">Units Lost (Dead Weight Loss)</div><div class="card-val" id="cv_lost">—</div><div class="card-sub">vs. no-IZO baseline</div></div>
     <div class="card"><div class="card-label">Annual Tax Revenue Δ</div><div class="card-val" id="cv_taxlost">—</div><div class="card-sub" id="cv_taxlost_sub">city + school + county</div></div>
   </div>
   <div class="panel">
@@ -182,7 +182,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:var(--ink3);box-shad
     </div>
     <div class="legend" style="margin-top:10px">
       <div class="li"><div class="ls" style="background:var(--city)"></div>Conventional property tax collected</div>
-      <div class="li" id="void_leg"><div class="ls" style="background:#f0e8e0;border:1px dashed #c0a888"></div><span>Revenue void — units never built (DWL)</span></div>
+      <div class="li" id="void_leg"><div class="ls" style="background:#f0e8e0;border:1px dashed #c0a888"></div><span>Revenue void — units never built (dead weight loss)</span></div>
       <div class="li" id="pilot_leg" style="display:none"><div class="ls" style="background:var(--school);opacity:.4"></div>School &amp; county receive $0 on PILOT-abated units (NJ law)</div>
     </div>
   </div>
@@ -369,7 +369,7 @@ function renderHeatGrid(sp,sc,bon,pr){
   if(sp===0)note='No affordable mandate — all projects fully feasible. Zero deadweight loss; full conventional tax revenue flows to city, schools, and county.';
   else if(sc===0)note=`At ${sp}% unfunded (no bonus, land+soft mult. ${BASE_LS}×), Workforce B− and Mid-market B are first to become infeasible. This mirrors downtown JC's experience: the existing 15% unfunded zone has produced zero market-rate starts without PILOT support.`;
   else if(sc===1)note=`A ${bon}% density bonus reduces effective land+soft cost from ${BASE_LS}× to ${lsEff}× per unit — the same land amortised across more units, directly improving ROC. Workforce B− remains most vulnerable.`;
-  else note=`PILOT + ${bon}% density bonus: effective land+soft cost falls to ${lsEff}×, PILOT replaces conventional tax with a lower payment, freeing up NOI. Together these restore most tiers to feasibility. Residual DWL reflects projects that can't secure a PILOT — bespoke negotiations take time and political capital.`;
+  else note=`PILOT + ${bon}% density bonus: effective land+soft cost falls to ${lsEff}×, PILOT replaces conventional tax with a lower payment, freeing up NOI. Together these restore most tiers to feasibility. Residual dead weight loss reflects projects that can't secure a PILOT — bespoke negotiations take time and political capital.`;
   document.getElementById('heat_note').textContent=note;
 }
 let curSc=0;
@@ -399,7 +399,7 @@ function render(){
   }else if(sc===1){
     verdictClass='v1';
     vh=`Upzoning and density bonuses recover some supply — but not enough to close the fiscal gap.`;
-    vs=`A ${effectiveBon}% density bonus lowers effective land cost per unit from ${BASE_LS}× to ${effectiveLS(effectiveBon).toFixed(2)}×, improving ROC and pulling some marginal projects back to feasibility. Mid-market B projects remain marginal or infeasible without a PILOT. Net DWL is reduced but not eliminated.`;
+    vs=`A ${effectiveBon}% density bonus lowers effective land cost per unit from ${BASE_LS}× to ${effectiveLS(effectiveBon).toFixed(2)}×, improving ROC and pulling some marginal projects back to feasibility. Mid-market B projects remain marginal or infeasible without a PILOT. Net dead weight loss is reduced but not eliminated.`;
   }else{
     verdictClass='v2';
     vh=`A PILOT + density bonus restores most supply — but diverts revenue from schools and the county.`;
