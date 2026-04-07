@@ -248,10 +248,10 @@ const CONV_TAX_RATE=0.020,PILOT_SURCHARGE=0.018;
 function sigmoidFeas(ratio){return 1.0/(1.0+Math.exp(-18*(ratio-0.960)));}
 
 const TIERS=[
-  {id:0,name:'Workforce',cls:'B−',color:'var(--tier0)',st:1900,br1:2400,br2:3000,br3:3600,hc:255000,rocTgt:0.055,baseFeas:0.05,entry:0.50},
-  {id:1,name:'Mid-market',cls:'B',color:'var(--tier1)',st:2600,br1:3200,br2:4100,br3:5000,hc:300000,rocTgt:0.052,baseFeas:1.00,entry:0.50},
-  {id:2,name:'Premium',cls:'A',color:'var(--tier2)',st:3200,br1:4000,br2:5200,br3:6200,hc:340000,rocTgt:0.057,baseFeas:1.00,entry:0.88},
-  {id:3,name:'Luxury',cls:'A+',color:'var(--tier3)',st:4000,br1:5000,br2:6500,br3:7800,hc:420000,rocTgt:0.060,baseFeas:1.00,entry:0.95},
+  {id:0,name:'Workforce',cls:'B−',color:'var(--tier0)',st:1900,br1:2400,br2:3000,br3:3600,hc:255000,rocTgt:0.063,baseFeas:0.05,entry:0.50},
+  {id:1,name:'Mid-market',cls:'B',color:'var(--tier1)',st:2600,br1:3200,br2:4100,br3:5000,hc:300000,rocTgt:0.063,baseFeas:1.00,entry:0.50},
+  {id:2,name:'Premium',cls:'A',color:'var(--tier2)',st:3200,br1:4000,br2:5200,br3:6200,hc:340000,rocTgt:0.060,baseFeas:1.00,entry:0.88},
+  {id:3,name:'Luxury',cls:'A+',color:'var(--tier3)',st:4000,br1:5000,br2:6500,br3:7800,hc:420000,rocTgt:0.057,baseFeas:1.00,entry:0.95},
 ];
 const REGIMES=[
   {name:'Low-rise', baseUnits:60,  hcMult:0.95, label:'5–7 stories'},
@@ -354,7 +354,7 @@ function renderHeatGrid(sp,sc,bon,pr){
       const r=computeROC(ti,ri,sp/100,hasPilot,effectivePr,effectiveBon);
       const rocTgt=TIERS[ti].rocTgt,ratio=r.ROC/rocTgt;
       const rp=(r.ROC*100).toFixed(1),tp=(rocTgt*100).toFixed(1);
-      const sig=sp===0?tier.baseFeas:sigmoidFeas(ratio)*tier.entry;
+      const sig=sp===0?sigmoidFeas(ratio)*tier.baseFeas:sigmoidFeas(ratio)*tier.entry;
       let bg,tc,lbl;
       if(sig>=0.80){bg='#d4f0e0';tc='#1a6e3a';lbl='Feasible';}
       else if(sig>=0.55){bg='#e0f0c8';tc='#3a6010';lbl='At target';}
