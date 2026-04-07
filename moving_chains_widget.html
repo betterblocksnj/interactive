@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Moving Chains Work</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,400&display=swap');
+
+  :root {
+    --navy: #1A3A5C;
+    --navy-dark: #0F2640;
+    --navy-light: #254D73;
+    --green: #7ECFA8;
+    --green-light: #A8E4C4;
+    --green-dark: #5CB88A;
+    --cream: #F7F4EF;
+    --warm-gray: #E8E3DB;
+    --text: #1A3A5C;
+    --text-light: #5A7A9A;
+    --orange: #E8935A;
+    --coral: #E07A6A;
+    --blue-light: #6AA8D4;
+    --purple: #8B7EB8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .header p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* === SCENE === */
+  .scene-wrapper {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    box-shadow: 0 2px 20px rgba(26,58,92,0.08);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .scene-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--green), var(--blue-light), var(--green));
+  }
+
+  .step-label {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--navy);
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .step-description {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+    min-height: 2.5em;
+  }
+
+  /* === BUILDINGS ROW === */
+  .buildings-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: clamp(0.75rem, 3vw, 2rem);
+    padding: 0 0.5rem;
+    min-height: 320px;
+  }
+
+  .building-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 1 180px;
+    min-width: 100px;
+  }
+
+  .building-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .building {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    transition: all 0.6s ease;
+  }
+
+  .building-new {
+    background: linear-gradient(180deg, var(--navy-light), var(--navy));
+    min-height: 220px;
+  }
+
+  .building-mid {
+    background: linear-gradient(180deg, #7A9AB8, #5A7A98);
+    min-height: 160px;
+  }
+
+  .building-old {
+    background: linear-gradient(180deg, #A0B8C8, #8AA0B4);
+    min-height: 120px;
+  }
+
+  .building-new.unbuilt {
+    min-height: 220px;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 8px,
+      rgba(26,58,92,0.08) 8px,
+      rgba(26,58,92,0.08) 16px
+    );
+    border: 2px dashed var(--navy-light);
+    border-bottom: none;
+    opacity: 0.5;
+  }
+
+  .building-new.built {
+    animation: buildUp 0.8s ease-out forwards;
+  }
+
+  @keyframes buildUp {
+    from { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+    to { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+  }
+
+  /* === UNITS INSIDE BUILDINGS === */
+  .unit-row {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 3px 6px;
+    margin-bottom: 2px;
+  }
+
+  .unit {
+    width: 28px;
+    height: 20px;
+    border-radius: 3px;
+    transition: all 0.5s ease;
+    position: relative;
+  }
+
+  .unit.vacant {
+    background: rgba(255,255,255,0.15);
+    border: 1px dashed rgba(255,255,255,0.3);
+  }
+
+  .unit.occupied {
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .unit .person-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: all 0.4s ease;
+  }
+
+  /* Income tiers */
+  .unit.high-income { background: var(--orange); }
+  .unit.mid-income  { background: var(--blue-light); }
+  .unit.low-income  { background: var(--green); }
+
+  .unit.moving-out {
+    animation: moveOut 0.6s ease-in forwards;
+  }
+
+  .unit.moving-in {
+    animation: moveIn 0.6s ease-out forwards;
+  }
+
+  @keyframes moveOut {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-30px); }
+  }
+
+  @keyframes moveIn {
+    0% { opacity: 0; transform: translateY(-30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === ARROW BETWEEN BUILDINGS === */
+  .chain-arrow {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .chain-arrow.visible {
+    opacity: 1;
+  }
+
+  /* === RENT TAG === */
+  .rent-tag {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    background: white;
+    color: var(--navy);
+    border: 1.5px solid var(--warm-gray);
+    transition: all 0.5s ease;
+    white-space: nowrap;
+  }
+
+  .rent-tag.decreased {
+    background: #E8F9F0;
+    border-color: var(--green);
+    color: var(--green-dark);
+  }
+
+  /* === LEGEND === */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--warm-gray);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-light);
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  /* === CONTROLS === */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.65rem 1.5rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary {
+    background: var(--navy);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--navy-light); transform: translateY(-1px); }
+  .btn-primary:disabled { background: #B0BEC5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: white;
+    color: var(--navy);
+    border: 2px solid var(--warm-gray);
+  }
+  .btn-secondary:hover { border-color: var(--navy); }
+
+  /* === STAT CALLOUT === */
+  .stat-callout {
+    margin-top: 1.5rem;
+    background: var(--navy);
+    color: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.5s ease;
+  }
+
+  .stat-callout.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stat-callout .stat-number {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--green);
+    display: block;
+  }
+
+  .stat-callout .stat-text {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-top: 0.25rem;
+    line-height: 1.4;
+  }
+
+  .stat-callout .stat-source {
+    font-size: 0.7rem;
+    opacity: 0.5;
+    margin-top: 0.5rem;
+  }
+
+  /* === STEP DOTS === */
+  .step-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--warm-gray);
+    transition: all 0.3s ease;
+  }
+
+  .step-dot.active {
+    background: var(--navy);
+    transform: scale(1.2);
+  }
+
+  .step-dot.complete {
+    background: var(--green);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .buildings-row { gap: 0.5rem; }
+    .building-col { min-width: 80px; flex: 0 1 140px; }
+    .unit { width: 22px; height: 16px; }
+    .unit .person-icon { font-size: 9px; }
+    .building-label { font-size: 0.6rem; }
+    .building-new { min-height: 180px; }
+    .building-mid { min-height: 130px; }
+    .building-old { min-height: 100px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>How Moving Chains Work</h1>
+    <p>When new housing is built, it triggers a chain reaction that frees up affordable units across the market — even "luxury" construction helps.</p>
+  </div>
+
+  <div class="scene-wrapper" id="scene">
+    <div class="step-dots" id="stepDots"></div>
+    <div class="step-label" id="stepLabel">Before: A Tight Housing Market</div>
+    <div class="step-description" id="stepDesc">All units are full. High-income renters compete with everyone for limited housing, bidding up rents across the board.</div>
+
+    <div class="buildings-row" id="buildingsRow">
+      <!-- Dynamically rendered -->
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--orange)"></div> Higher income</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-light)"></div> Middle income</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--green)"></div> Lower income</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(0,0,0,0.08); border:1px dashed rgba(0,0,0,0.2)"></div> Vacant</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-secondary" id="btnPrev" disabled>← Back</button>
+    <button class="btn btn-primary" id="btnNext">Next Step →</button>
+    <button class="btn btn-secondary" id="btnReset" style="display:none;">Reset</button>
+  </div>
+
+  <div class="stat-callout" id="statCallout">
+    <span class="stat-number" id="statNumber"></span>
+    <span class="stat-text" id="statText"></span>
+    <span class="stat-source" id="statSource"></span>
+  </div>
+</div>
+
+<script>
+const steps = [
+  {
+    label: "Before: A Tight Housing Market",
+    desc: "All units are full. High-income renters who can't find new apartments compete for older housing, bidding up rents everywhere.",
+    buildings: [
+      { type: 'new', status: 'unbuilt', label: 'New Building', rent: null, units: [] },
+      { type: 'mid', status: 'built', label: 'Mid-Range Apts', rent: '$2,400/mo', units: [
+        ['high-income','mid-income'],
+        ['mid-income','mid-income'],
+        ['mid-income','low-income'],
+      ]},
+      { type: 'old', status: 'built', label: 'Older Apts', rent: '$1,800/mo', units: [
+        ['mid-income','low-income'],
+        ['low-income','low-income'],
+      ]},
+    ],
+    stat: null
+  },
+  {
+    label: "Step 1: New Housing Gets Built",
+    desc: "A new apartment building is constructed, adding supply to the market. Units are available for move-in.",
+    buildings: [
+      { type: 'new', status: 'built', label: 'New Building', rent: '$3,200/mo', units: [
+        ['vacant','vacant'],
+        ['vacant','vacant'],
+        ['vacant','vacant'],
+        ['vacant','vacant'],
+      ]},
+      { type: 'mid', status: 'built', label: 'Mid-Range Apts', rent: '$2,400/mo', units: [
+        ['high-income','mid-income'],
+        ['mid-income','mid-income'],
+        ['mid-income','low-income'],
+      ]},
+      { type: 'old', status: 'built', label: 'Older Apts', rent: '$1,800/mo', units: [
+        ['mid-income','low-income'],
+        ['low-income','low-income'],
+      ]},
+    ],
+    stat: null
+  },
+  {
+    label: "Step 2: Higher-Income Renters Move Up",
+    desc: "Higher-income renters in older buildings move into the new building, freeing up their mid-range apartments.",
+    buildings: [
+      { type: 'new', status: 'built', label: 'New Building', rent: '$3,200/mo', units: [
+        ['high-income','vacant'],
+        ['vacant','vacant'],
+        ['vacant','vacant'],
+        ['vacant','vacant'],
+      ]},
+      { type: 'mid', status: 'built', label: 'Mid-Range Apts', rent: '$2,400/mo', units: [
+        ['vacant','mid-income'],
+        ['mid-income','mid-income'],
+        ['mid-income','low-income'],
+      ]},
+      { type: 'old', status: 'built', label: 'Older Apts', rent: '$1,800/mo', units: [
+        ['mid-income','low-income'],
+        ['low-income','low-income'],
+      ]},
+    ],
+    stat: null
+  },
+  {
+    label: "Step 3: The Chain Continues",
+    desc: "Middle-income renters move from older buildings into the now-vacant mid-range apartments. Their older units open up.",
+    buildings: [
+      { type: 'new', status: 'built', label: 'New Building', rent: '$3,200/mo', units: [
+        ['high-income','high-income'],
+        ['high-income','mid-income'],
+        ['vacant','vacant'],
+        ['vacant','vacant'],
+      ]},
+      { type: 'mid', status: 'built', label: 'Mid-Range Apts', rent: '$2,300/mo', rentDelta: true, units: [
+        ['mid-income','mid-income'],
+        ['mid-income','mid-income'],
+        ['mid-income','vacant'],
+      ]},
+      { type: 'old', status: 'built', label: 'Older Apts', rent: '$1,800/mo', units: [
+        ['vacant','low-income'],
+        ['low-income','low-income'],
+      ]},
+    ],
+    stat: { number: '−6%', text: 'Nearby rents decrease relative to units slightly farther from new construction.', source: 'Asquith, Mast & Reed (2023) — 11 U.S. cities' }
+  },
+  {
+    label: "Step 4: Affordable Units Free Up",
+    desc: "Lower-income households face less competition. Vacancies increase in older buildings, putting downward pressure on rents.",
+    buildings: [
+      { type: 'new', status: 'built', label: 'New Building', rent: '$3,200/mo', units: [
+        ['high-income','high-income'],
+        ['high-income','mid-income'],
+        ['mid-income','mid-income'],
+        ['mid-income','vacant'],
+      ]},
+      { type: 'mid', status: 'built', label: 'Mid-Range Apts', rent: '$2,300/mo', rentDelta: true, units: [
+        ['mid-income','mid-income'],
+        ['mid-income','mid-income'],
+        ['mid-income','low-income'],
+      ]},
+      { type: 'old', status: 'built', label: 'Older Apts', rent: '$1,700/mo', rentDelta: true, units: [
+        ['low-income','low-income'],
+        ['low-income','vacant'],
+      ]},
+    ],
+    stat: { number: '−17%', text: 'Reduction in the risk of displacement for households within 100 meters of a new building.', source: 'Pennington (2021) — San Francisco' }
+  },
+  {
+    label: "Result: Everyone Benefits",
+    desc: "New construction — even at market rate — loosens the entire market. Lower-income renters face less competition and lower rents.",
+    buildings: [
+      { type: 'new', status: 'built', label: 'New Building', rent: '$3,200/mo', units: [
+        ['high-income','high-income'],
+        ['high-income','mid-income'],
+        ['mid-income','mid-income'],
+        ['mid-income','mid-income'],
+      ]},
+      { type: 'mid', status: 'built', label: 'Mid-Range Apts', rent: '$2,250/mo', rentDelta: true, units: [
+        ['mid-income','mid-income'],
+        ['mid-income','mid-income'],
+        ['low-income','low-income'],
+      ]},
+      { type: 'old', status: 'built', label: 'Older Apts', rent: '$1,650/mo', rentDelta: true, units: [
+        ['low-income','low-income'],
+        ['low-income','low-income'],
+      ]},
+    ],
+    stat: { number: '70', text: 'For every 100 new apartments built, approximately 70 older, more affordable units are freed up through moving chains.', source: 'Bratu, Harjunen & Saarima (2021) — Helsinki' }
+  },
+];
+
+let currentStep = 0;
+const btnNext = document.getElementById('btnNext');
+const btnPrev = document.getElementById('btnPrev');
+const btnReset = document.getElementById('btnReset');
+const stepLabel = document.getElementById('stepLabel');
+const stepDesc = document.getElementById('stepDesc');
+const buildingsRow = document.getElementById('buildingsRow');
+const statCallout = document.getElementById('statCallout');
+const stepDotsEl = document.getElementById('stepDots');
+
+// Create dots
+steps.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'step-dot' + (i === 0 ? ' active' : '');
+  stepDotsEl.appendChild(dot);
+});
+
+function updateDots() {
+  const dots = stepDotsEl.children;
+  for (let i = 0; i < dots.length; i++) {
+    dots[i].className = 'step-dot';
+    if (i < currentStep) dots[i].classList.add('complete');
+    if (i === currentStep) dots[i].classList.add('active');
+  }
+}
+
+function renderBuildings(step) {
+  buildingsRow.innerHTML = '';
+  step.buildings.forEach(b => {
+    const col = document.createElement('div');
+    col.className = 'building-col';
+
+    const label = document.createElement('div');
+    label.className = 'building-label';
+    label.textContent = b.label;
+    col.appendChild(label);
+
+    const bldg = document.createElement('div');
+    bldg.className = `building building-${b.type}`;
+    if (b.status === 'unbuilt') bldg.classList.add('unbuilt');
+    if (b.type === 'new' && b.status === 'built' && currentStep === 1) bldg.classList.add('built');
+
+    b.units.forEach(row => {
+      const unitRow = document.createElement('div');
+      unitRow.className = 'unit-row';
+      row.forEach(u => {
+        const unit = document.createElement('div');
+        unit.className = `unit ${u}`;
+        if (u === 'vacant') {
+          unit.classList.add('vacant');
+        } else {
+          unit.classList.add('occupied');
+          const icon = document.createElement('span');
+          icon.className = 'person-icon';
+          icon.textContent = u === 'high-income' ? '●' : u === 'mid-income' ? '●' : '●';
+          unit.appendChild(icon);
+        }
+        unitRow.appendChild(unit);
+      });
+      bldg.appendChild(unitRow);
+    });
+
+    col.appendChild(bldg);
+
+    if (b.rent) {
+      const tag = document.createElement('div');
+      tag.className = 'rent-tag';
+      if (b.rentDelta) tag.classList.add('decreased');
+      tag.textContent = b.rent;
+      col.appendChild(tag);
+    }
+
+    buildingsRow.appendChild(col);
+  });
+}
+
+function renderStep() {
+  const step = steps[currentStep];
+  stepLabel.textContent = step.label;
+  stepDesc.textContent = step.desc;
+  renderBuildings(step);
+  updateDots();
+
+  // Stat callout
+  if (step.stat) {
+    document.getElementById('statNumber').textContent = step.stat.number;
+    document.getElementById('statText').textContent = step.stat.text;
+    document.getElementById('statSource').textContent = step.stat.source;
+    setTimeout(() => statCallout.classList.add('visible'), 300);
+  } else {
+    statCallout.classList.remove('visible');
+  }
+
+  // Button states
+  btnPrev.disabled = currentStep === 0;
+  if (currentStep === steps.length - 1) {
+    btnNext.style.display = 'none';
+    btnReset.style.display = '';
+  } else {
+    btnNext.style.display = '';
+    btnReset.style.display = 'none';
+  }
+}
+
+btnNext.addEventListener('click', () => {
+  if (currentStep < steps.length - 1) { currentStep++; renderStep(); }
+});
+btnPrev.addEventListener('click', () => {
+  if (currentStep > 0) { currentStep--; renderStep(); }
+});
+btnReset.addEventListener('click', () => {
+  currentStep = 0; renderStep();
+});
+
+renderStep();
+</script>
+</body>
+</html>
