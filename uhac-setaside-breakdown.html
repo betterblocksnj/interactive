@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UHAC Affordable Set-Aside Breakdown</title>
+<style>
+  :root {
+    --navy: #1A3A5C;
+    --green: #7ECFA8;
+    --bg: #f7f9fb;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1a202c;
+    --muted: #64748b;
+    --vli: #c53030;
+    --li: #dd6b20;
+    --mod: #38a169;
+    --market: #cbd5e0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0; padding: 20px;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+  }
+  .widget {
+    max-width: 820px; margin: 0 auto;
+    background: var(--card); border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(26,58,92,0.08);
+    overflow: hidden;
+  }
+  .header { background: var(--navy); color: white; padding: 24px 28px; }
+  .header h1 { margin: 0 0 6px; font-size: 22px; }
+  .header p { margin: 0; opacity: 0.85; font-size: 14px; }
+  .body { padding: 28px; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  @media (max-width: 600px) { .controls { grid-template-columns: 1fr; } }
+  label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px; }
+  .slider-wrap { display: flex; align-items: center; gap: 12px; }
+  input[type="range"] { flex: 1; accent-color: var(--green); }
+  .val { font-size: 20px; font-weight: 700; color: var(--navy); min-width: 60px; text-align: right; }
+  h3 { color: var(--navy); margin: 28px 0 12px; font-size: 16px; }
+  .stack-bar {
+    display: flex; height: 56px; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .seg {
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 13px;
+    transition: flex 0.3s;
+    min-width: 0;
+  }
+  .seg.vli { background: var(--vli); }
+  .seg.li { background: var(--li); }
+  .seg.mod { background: var(--mod); }
+  .seg.market { background: var(--market); color: #4a5568; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 13px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  .stat {
+    background: #f0f5fa; border-left: 4px solid var(--navy);
+    padding: 14px 16px; border-radius: 6px;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .stat-val { font-size: 22px; font-weight: 700; color: var(--navy); margin-top: 2px; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .bed-bar {
+    display: flex; height: 48px; border-radius: 8px; overflow: hidden;
+    margin-top: 8px;
+  }
+  .bed-seg {
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 13px;
+    min-width: 0;
+  }
+  .bed-seg.studio { background: #4a5568; }
+  .bed-seg.one { background: #718096; }
+  .bed-seg.two { background: #3182ce; }
+  .bed-seg.three { background: #1A3A5C; }
+  .footnote { font-size: 12px; color: var(--muted); margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .footnote a { color: var(--navy); }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="header">
+    <h1>How UHAC Splits Affordable Units in a New Building</h1>
+    <p>The state rules behind the 13% / 37% / 50% affordable set-aside and the 80% 2-3BR mix</p>
+  </div>
+  <div class="body">
+    <div class="controls">
+      <div>
+        <label for="total">Total Units in Building</label>
+        <div class="slider-wrap">
+          <input type="range" id="total" min="20" max="1500" value="200" step="10">
+          <div class="val" id="total-val">200</div>
+        </div>
+      </div>
+      <div>
+        <label for="setaside">Affordable Set-Aside %</label>
+        <div class="slider-wrap">
+          <input type="range" id="setaside" min="5" max="30" value="20" step="1">
+          <div class="val" id="setaside-val">20%</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Income mix of the <span id="aff-count-inline"></span> affordable units</h3>
+    <div class="stack-bar" id="income-bar"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="swatch" style="background:var(--vli)"></div>Very-Low (≤30% AMI): 13%</div>
+      <div class="legend-item"><div class="swatch" style="background:var(--li)"></div>Low (≤50% AMI): 37%</div>
+      <div class="legend-item"><div class="swatch" style="background:var(--mod)"></div>Moderate (≤80% AMI): 50%</div>
+    </div>
+
+    <h3>Bedroom mix of affordable units (UHAC rules)</h3>
+    <div class="bed-bar" id="bed-bar"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="swatch" style="background:#4a5568"></div>Studio + 1BR: ≤20%</div>
+      <div class="legend-item"><div class="swatch" style="background:#3182ce"></div>2BR: ~60%</div>
+      <div class="legend-item"><div class="swatch" style="background:#1A3A5C"></div>3BR: ≥20%</div>
+    </div>
+
+    <h3>Full building breakdown</h3>
+    <div class="grid">
+      <div class="stat">
+        <div class="stat-label">Affordable Units</div>
+        <div class="stat-val" id="aff-count">40</div>
+        <div class="stat-sub" id="aff-sub">at 20% set-aside</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Market-Rate Units</div>
+        <div class="stat-val" id="mkt-count">160</div>
+        <div class="stat-sub">pay for the affordable units</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Very-Low-Income Units</div>
+        <div class="stat-val" id="vli-count">5</div>
+        <div class="stat-sub">13% of affordable</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Low-Income Units</div>
+        <div class="stat-val" id="li-count">15</div>
+        <div class="stat-sub">37% of affordable</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Moderate-Income Units</div>
+        <div class="stat-val" id="mod-count">20</div>
+        <div class="stat-sub">50% of affordable, avg 53% AMI</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">3-Bedroom Affordable Units</div>
+        <div class="stat-val" id="threebr-count">8</div>
+        <div class="stat-sub">≥20% of affordable required</div>
+      </div>
+    </div>
+
+    <div class="footnote">
+      UHAC bedroom-mix rules apply when there are more than 10 affordable units in a building: at least 80% must be 2BR or 3BR, and at least 20% must be 3BR. The 13/37/50 income split requires the moderate tier to average 53% of AMI. Source: <a href="https://www.nj.gov/dca/hmfa/developers/lihtc/compliance/incomelimits.shtml" target="_blank">N.J.A.C. 5:80-26</a>.
+    </div>
+  </div>
+</div>
+
+<script>
+function update() {
+  const total = parseInt(document.getElementById('total').value);
+  const setaside = parseInt(document.getElementById('setaside').value);
+  document.getElementById('total-val').textContent = total;
+  document.getElementById('setaside-val').textContent = setaside + '%';
+
+  const aff = Math.round(total * setaside / 100);
+  const mkt = total - aff;
+
+  const vli = Math.round(aff * 0.13);
+  const li = Math.round(aff * 0.37);
+  const mod = aff - vli - li;
+
+  document.getElementById('aff-count').textContent = aff;
+  document.getElementById('aff-count-inline').textContent = aff;
+  document.getElementById('aff-sub').textContent = `at ${setaside}% set-aside`;
+  document.getElementById('mkt-count').textContent = mkt;
+  document.getElementById('vli-count').textContent = vli;
+  document.getElementById('li-count').textContent = li;
+  document.getElementById('mod-count').textContent = mod;
+
+  // Income mix bar
+  const bar = document.getElementById('income-bar');
+  if (aff === 0) {
+    bar.innerHTML = '<div class="seg market" style="flex:1">No affordable units</div>';
+  } else {
+    bar.innerHTML = `
+      <div class="seg vli" style="flex:13">${vli}</div>
+      <div class="seg li" style="flex:37">${li}</div>
+      <div class="seg mod" style="flex:50">${mod}</div>
+    `;
+  }
+
+  // Bedroom mix — assume 20% studio/1BR, 60% 2BR, 20% 3BR (UHAC minimums)
+  // When aff > 10, rules apply; otherwise just split evenly
+  let studio1, twoBR, threeBR;
+  if (aff > 10) {
+    studio1 = Math.round(aff * 0.20);
+    threeBR = Math.max(Math.round(aff * 0.20), 1);
+    twoBR = aff - studio1 - threeBR;
+  } else {
+    studio1 = Math.round(aff * 0.34);
+    twoBR = Math.round(aff * 0.33);
+    threeBR = aff - studio1 - twoBR;
+  }
+  document.getElementById('threebr-count').textContent = threeBR;
+
+  const bedBar = document.getElementById('bed-bar');
+  if (aff === 0) {
+    bedBar.innerHTML = '<div class="bed-seg" style="flex:1;background:#cbd5e0;color:#4a5568">—</div>';
+  } else {
+    bedBar.innerHTML = `
+      <div class="bed-seg studio" style="flex:${studio1 || 0.01}">${studio1}</div>
+      <div class="bed-seg two" style="flex:${twoBR || 0.01}">${twoBR}</div>
+      <div class="bed-seg three" style="flex:${threeBR || 0.01}">${threeBR}</div>
+    `;
+  }
+}
+document.getElementById('total').addEventListener('input', update);
+document.getElementById('setaside').addEventListener('input', update);
+update();
+</script>
+</body>
+</html>
