@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Evidence: New Housing Lowers Rents</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,400&display=swap');
+
+  :root {
+    --navy: #1A3A5C;
+    --navy-dark: #0F2640;
+    --navy-light: #254D73;
+    --green: #7ECFA8;
+    --green-light: #E8F9F0;
+    --green-dark: #5CB88A;
+    --cream: #F7F4EF;
+    --warm-gray: #E8E3DB;
+    --text: #1A3A5C;
+    --text-light: #5A7A9A;
+    --orange: #E8935A;
+    --coral: #E07A6A;
+    --blue-light: #6AA8D4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+
+  .header .subtitle {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    line-height: 1.5;
+  }
+
+  /* === FILTER TABS === */
+  .filters {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    border-radius: 50px;
+    border: 1.5px solid var(--warm-gray);
+    background: white;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .filter-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+  /* === CARDS === */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(26,58,92,0.06);
+    overflow: hidden;
+    transition: all 0.35s ease;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+  }
+
+  .card:hover { box-shadow: 0 4px 24px rgba(26,58,92,0.1); border-color: var(--green); }
+
+  .card.hidden { display: none; }
+
+  .card-top {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .card-stat-block {
+    flex: 0 0 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 0.75rem;
+    position: relative;
+  }
+
+  .card-stat-block::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 15%;
+    bottom: 15%;
+    width: 1px;
+    background: var(--warm-gray);
+  }
+
+  .stat-big {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 2.2rem;
+    line-height: 1;
+    margin-bottom: 0.2rem;
+  }
+
+  .stat-unit {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-light);
+    text-align: center;
+  }
+
+  .card-body {
+    flex: 1;
+    padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-finding {
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+
+  .card-meta {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  .tag-rents       { background: #FFF3E8; color: var(--orange); }
+  .tag-displacement { background: var(--green-light); color: var(--green-dark); }
+  .tag-chains      { background: #E8F0FA; color: var(--blue-light); }
+  .tag-jc          { background: #F0E8F5; color: #8B7EB8; }
+
+  /* === EXPANDED DETAIL === */
+  .card-detail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s ease;
+    padding: 0 1.5rem;
+    background: #FAFAF8;
+    border-top: 0px solid var(--warm-gray);
+  }
+
+  .card.expanded .card-detail {
+    max-height: 300px;
+    padding: 1rem 1.5rem 1.25rem;
+    border-top-width: 1px;
+  }
+
+  .card-detail-text {
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text-light);
+  }
+
+  .card-detail-text strong { color: var(--navy); }
+
+  .card-detail-cite {
+    margin-top: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--text-light);
+    opacity: 0.7;
+    font-style: italic;
+  }
+
+  .expand-hint {
+    font-size: 0.68rem;
+    color: var(--text-light);
+    opacity: 0.5;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .card.expanded .expand-hint::after { content: ' ▲'; }
+  .card:not(.expanded) .expand-hint::after { content: ' ▼'; }
+
+  /* === BOTTOM SUMMARY === */
+  .summary-bar {
+    margin-top: 2rem;
+    background: var(--navy);
+    border-radius: 14px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1px;
+    overflow: hidden;
+    flex-wrap: wrap;
+  }
+
+  .summary-cell {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+    padding: 0.5rem;
+  }
+
+  .summary-cell + .summary-cell { border-left: 1px solid rgba(255,255,255,0.12); }
+
+  .summary-number {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--green);
+  }
+
+  .summary-label {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.6);
+    margin-top: 0.15rem;
+    line-height: 1.3;
+  }
+
+  @media (max-width: 600px) {
+    .card-stat-block { flex: 0 0 90px; padding: 1rem 0.5rem; }
+    .stat-big { font-size: 1.6rem; }
+    .card-body { padding: 1rem; }
+    .card-finding { font-size: 0.85rem; }
+    .summary-bar { flex-direction: column; gap: 0; }
+    .summary-cell + .summary-cell { border-left: none; border-top: 1px solid rgba(255,255,255,0.12); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>The Evidence: New Housing Lowers Rents</h1>
+    <p class="subtitle">Peer-reviewed findings from major studies across the U.S. and internationally. Tap any card for details.</p>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">All Findings</button>
+    <button class="filter-btn" data-filter="rents">Rent Effects</button>
+    <button class="filter-btn" data-filter="displacement">Displacement</button>
+    <button class="filter-btn" data-filter="chains">Moving Chains</button>
+    <button class="filter-btn" data-filter="jc">Jersey City</button>
+  </div>
+
+  <div class="cards" id="cards">
+    <!-- Card 1 -->
+    <div class="card" data-tags="rents chains">
+      <div class="card-top">
+        <div class="card-stat-block">
+          <div class="stat-big" style="color:var(--orange)">−6%</div>
+          <div class="stat-unit">nearby rents</div>
+        </div>
+        <div class="card-body">
+          <div class="card-finding">New buildings decrease rents in nearby units by about 6% relative to units slightly farther away.</div>
+          <div class="card-meta">
+            <span class="card-tag tag-rents">Rent Effects</span>
+            <span class="card-tag tag-chains">Moving Chains</span>
+            <span class="expand-hint">Details</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-text">
+          Using comprehensive change-of-address records from <strong>11 U.S. cities</strong> (Atlanta, Austin, Chicago, Denver, LA, NYC, Philadelphia, Portland, San Francisco, Seattle, and DC), the researchers found that new market-rate buildings decrease rents in nearby units and <strong>increase in-migration from low-income areas</strong>.
+        </div>
+        <div class="card-detail-cite">Asquith, Mast & Reed (2023) — "Local Effects of Large New Apartment Buildings in Low-Income Areas"</div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="card" data-tags="rents">
+      <div class="card-top">
+        <div class="card-stat-block">
+          <div class="stat-big" style="color:var(--orange)">−1%</div>
+          <div class="stat-unit">per 10% supply</div>
+        </div>
+        <div class="card-body">
+          <div class="card-finding">For each 10% increase in housing stock, rents decrease by 1% in properties within 500 feet of new construction.</div>
+          <div class="card-meta">
+            <span class="card-tag tag-rents">Rent Effects</span>
+            <span class="expand-hint">Details</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-text">
+          Using a comprehensive dataset of <strong>rent rolls in New York City</strong>, the study found that new construction reduces not just rents but also sale prices in the immediate vicinity. The effect is strongest for properties closest to the new building and diminishes with distance.
+        </div>
+        <div class="card-detail-cite">Li (2022) — "Do New Housing Units in Your Backyard Raise Your Rents?"</div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card" data-tags="displacement">
+      <div class="card-top">
+        <div class="card-stat-block">
+          <div class="stat-big" style="color:var(--green-dark)">−17%</div>
+          <div class="stat-unit">displacement risk</div>
+        </div>
+        <div class="card-body">
+          <div class="card-finding">The risk of displacement falls by 17% for households within 100 meters of a new project.</div>
+          <div class="card-meta">
+            <span class="card-tag tag-displacement">Displacement</span>
+            <span class="expand-hint">Details</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-text">
+          Studying San Francisco, this research directly measured whether new market-rate housing causes nearby residents to be displaced. The finding is clear: <strong>residents near new construction are less likely to move out involuntarily</strong>, not more.
+        </div>
+        <div class="card-detail-cite">Pennington (2021) — "Does Building New Housing Cause Displacement? The Supply and Demand Effects of Construction in San Francisco"</div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card" data-tags="chains">
+      <div class="card-top">
+        <div class="card-stat-block">
+          <div class="stat-big" style="color:var(--blue-light)">70</div>
+          <div class="stat-unit">units freed per 100 built</div>
+        </div>
+        <div class="card-body">
+          <div class="card-finding">New market-rate construction triggers moving chains that quickly reach middle- and low-income neighborhoods.</div>
+          <div class="card-meta">
+            <span class="card-tag tag-chains">Moving Chains</span>
+            <span class="expand-hint">Details</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-text">
+          Studying Helsinki with detailed registry data, the researchers traced <strong>actual household moves</strong> triggered by new market-rate buildings. They found that the chain of moves reaches low-income areas <strong>even in the short run</strong>. Market-rate supply improves affordability outside the immediate sub-market where construction occurs.
+        </div>
+        <div class="card-detail-cite">Bratu, Harjunen & Saarima (2021) — "City-wide Effects of New Housing Supply"</div>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="card" data-tags="displacement rents">
+      <div class="card-top">
+        <div class="card-stat-block">
+          <div class="stat-big" style="color:var(--green-dark)">↑</div>
+          <div class="stat-unit">all groups move in</div>
+        </div>
+        <div class="card-body">
+          <div class="card-finding">New construction increases rates of people moving in across all socio-economic groups in gentrifying neighborhoods.</div>
+          <div class="card-meta">
+            <span class="card-tag tag-displacement">Displacement</span>
+            <span class="card-tag tag-rents">Rent Effects</span>
+            <span class="expand-hint">Details</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-text">
+          In the nine-county San Francisco Bay Area, new market-rate construction in gentrifying neighborhoods <strong>neither worsened nor eased rates of moving out</strong>, but it <strong>increased in-migration across all income levels</strong>. New construction makes neighborhoods more attractive for higher earners and more affordable for lower-income households simultaneously.
+        </div>
+        <div class="card-detail-cite">Chapple et al. (2022) — Federal Reserve Bank of San Francisco Community Development Working Papers</div>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="card" data-tags="rents">
+      <div class="card-top">
+        <div class="card-stat-block">
+          <div class="stat-big" style="color:var(--orange)">Max</div>
+          <div class="stat-unit">benefit to lowest</div>
+        </div>
+        <div class="card-body">
+          <div class="card-finding">The lowest-income households benefit the most from new market-rate construction as a percentage of their household income.</div>
+          <div class="card-meta">
+            <span class="card-tag tag-rents">Rent Effects</span>
+            <span class="expand-hint">Details</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-text">
+          Extending Li's NYC rent-roll data, Rollet's modeling finds that the <strong>affordability gains from new market-rate construction are progressive</strong> — they disproportionately benefit lower-income households who spend a larger share of their income on rent.
+        </div>
+        <div class="card-detail-cite">Rollet (2025) — Extension of Li (2022) rent-roll analysis, New York City</div>
+      </div>
+    </div>
+
+    <!-- Card 7: JC -->
+    <div class="card" data-tags="jc">
+      <div class="card-top">
+        <div class="card-stat-block">
+          <div class="stat-big" style="color:#8B7EB8">+11%</div>
+          <div class="stat-unit">moderate-income HHs</div>
+        </div>
+        <div class="card-body">
+          <div class="card-finding">Jersey City saw the largest increase in moderate-income households of all surrounding municipalities from 2018–2023.</div>
+          <div class="card-meta">
+            <span class="card-tag tag-jc">Jersey City</span>
+            <span class="expand-hint">Details</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-detail">
+        <div class="card-detail-text">
+          Despite substantial new "luxury" construction, Jersey City saw an <strong>11% increase in households earning under $75,000/year</strong>. This directly contradicts the narrative that new development leads to socio-economic displacement. JC's high rate of per-capita housing production has kept it affordable relative to similarly situated NYC neighborhoods.
+        </div>
+        <div class="card-detail-cite">ACS / Census data, 2018–2023</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary bar -->
+  <div class="summary-bar">
+    <div class="summary-cell">
+      <div class="summary-number">7</div>
+      <div class="summary-label">Studies cited</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-number">12+</div>
+      <div class="summary-label">Cities studied</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-number">0</div>
+      <div class="summary-label">Credible studies showing supply increases rents</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Filter logic
+const filterBtns = document.querySelectorAll('.filter-btn');
+const cards = document.querySelectorAll('.card');
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    cards.forEach(card => {
+      if (filter === 'all') {
+        card.classList.remove('hidden');
+      } else {
+        const tags = card.dataset.tags || '';
+        card.classList.toggle('hidden', !tags.includes(filter));
+      }
+    });
+  });
+});
+
+// Expand/collapse
+cards.forEach(card => {
+  card.addEventListener('click', () => {
+    const wasExpanded = card.classList.contains('expanded');
+    // Close all
+    cards.forEach(c => c.classList.remove('expanded'));
+    // Toggle clicked
+    if (!wasExpanded) card.classList.add('expanded');
+  });
+});
+</script>
+</body>
+</html>
