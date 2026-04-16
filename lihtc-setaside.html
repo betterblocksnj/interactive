@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIHTC Set-Aside Options — Better Blocks NJ</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #1A3A5C; --teal: #7ECFA8; --teal-dark: #3A7D8C;
+    --offwhite: #F5F3EE; --text: #1a1a1a; --muted: #5a5a5a;
+    --border: rgba(26,58,92,0.15); --bg2: #f0ede8;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--offwhite); color: var(--text); padding: 1.25rem; font-size: 15px; }
+  .widget-header { display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--navy); padding-bottom: 10px; margin-bottom: 1.25rem; }
+  .logo-bar { width: 6px; height: 28px; background: var(--teal); border-radius: 2px; flex-shrink: 0; }
+  .widget-header h2 { font-size: 15px; font-weight: 600; color: var(--navy); }
+  .brand { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  .setaside-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 1.25rem; }
+  .sa-card {
+    background: #fff; border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 14px; cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .sa-card:hover { border-color: rgba(26,58,92,0.4); }
+  .sa-card.active { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(26,58,92,0.15); }
+  .sa-card .sa-badge {
+    display: inline-block; background: var(--bg2); color: var(--navy);
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px;
+    margin-bottom: 8px; letter-spacing: 0.03em;
+  }
+  .sa-card.active .sa-badge { background: var(--navy); color: var(--teal); }
+  .sa-card .sa-name { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+  .sa-card .sa-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .sa-card .sa-year { font-size: 10px; color: var(--muted); margin-top: 6px; font-style: italic; }
+  .unit-builder { margin-bottom: 1.25rem; }
+  .ub-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .ub-label strong { color: var(--navy); font-weight: 600; }
+  .unit-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .unit-slot {
+    width: 36px; height: 36px; border-radius: 6px; border: 1.5px solid var(--border);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; transition: background 0.1s, border-color 0.1s;
+    background: #fff; color: var(--muted); position: relative;
+  }
+  .unit-slot.affordable { background: var(--teal); border-color: var(--teal); color: var(--navy); }
+  .unit-slot.market { background: #fff; color: var(--muted); }
+  .unit-slot.ami-20 { background: #E1F5EE; border-color: #9FE1CB; color: var(--navy); }
+  .unit-slot.ami-30 { background: #C5EDD8; border-color: #9FE1CB; color: var(--navy); }
+  .unit-slot.ami-40 { background: #9FE1CB; border-color: #9FE1CB; color: var(--navy); }
+  .unit-slot.ami-60 { background: #7ECFA8; border-color: #7ECFA8; color: var(--navy); }
+  .unit-slot.ami-80 { background: #5DCAA5; border-color: #5DCAA5; color: var(--navy); }
+  .compliance-bar {
+    background: var(--bg2); border-radius: 8px; padding: 12px 14px;
+    margin-bottom: 1rem;
+  }
+  .cb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .cb-label { font-size: 12px; color: var(--muted); }
+  .cb-value { font-size: 13px; font-weight: 700; }
+  .cb-value.pass { color: #0F6E56; }
+  .cb-value.fail { color: #c0392b; }
+  .status-banner {
+    padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;
+    margin-bottom: 1rem; text-align: center;
+  }
+  .status-banner.pass { background: rgba(126,207,168,0.25); color: #0F6E56; border: 1px solid rgba(126,207,168,0.5); }
+  .status-banner.fail { background: rgba(192,57,43,0.1); color: #993C1D; border: 1px solid rgba(192,57,43,0.2); }
+  .ait-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; font-size: 11px; }
+  .ait-swatch { display: flex; align-items: center; gap: 5px; }
+  .ait-sq { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .src { font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.75rem; line-height: 1.6; }
+  .src a { color: var(--teal-dark); text-decoration: none; }
+  .ctrl-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .ctrl-row label { font-size: 12px; color: var(--muted); }
+  .ctrl-row input[type=range] { flex: 1; accent-color: var(--navy); }
+  .ctrl-row strong { font-size: 13px; font-weight: 700; color: var(--navy); min-width: 28px; }
+</style>
+</head>
+<body>
+
+<div class="widget-header">
+  <div class="logo-bar"></div>
+  <h2>LIHTC Set-Aside Elections</h2>
+  <span class="brand">Better Blocks NJ</span>
+</div>
+
+<div class="setaside-grid">
+  <div class="sa-card active" id="card-2050" onclick="selectSetAside('2050')">
+    <div class="sa-badge">20/50</div>
+    <div class="sa-name">20% at 50% AMI</div>
+    <div class="sa-desc">At least 20% of units restricted to households earning ≤50% of Area Median Income.</div>
+  </div>
+  <div class="sa-card" id="card-4060" onclick="selectSetAside('4060')">
+    <div class="sa-badge">40/60</div>
+    <div class="sa-name">40% at 60% AMI</div>
+    <div class="sa-desc">At least 40% of units restricted to households earning ≤60% AMI. Most common election in NJ.</div>
+  </div>
+  <div class="sa-card" id="card-ait" onclick="selectSetAside('ait')">
+    <div class="sa-badge">AIT</div>
+    <div class="sa-name">Average Income Test</div>
+    <div class="sa-desc">40% of units designated 20–80% AMI; average across designated units must not exceed 60% AMI.</div>
+    <div class="sa-year">Added by Consolidated Appropriations Act, 2018</div>
+  </div>
+</div>
+
+<div class="ctrl-row">
+  <label>Total units in project</label>
+  <input type="range" id="totalUnits" min="10" max="100" step="5" value="40" oninput="updateUnits()">
+  <strong id="totalUnits-out">40</strong>
+</div>
+
+<div class="unit-builder" id="unit-builder"></div>
+
+<div class="compliance-bar" id="compliance-bar"></div>
+<div class="status-banner" id="status-banner"></div>
+
+<div class="src">
+  IRC §42(g). The election is irrevocable once made on IRS Form 8609. The AIT was added by the Consolidated Appropriations Act of 2018 (Pub. L. 115-141). In practice, most NJHMFA projects elect the 40/60 or AIT options.
+  · <a href="https://betterblocksnj.org" target="_blank">betterblocksnj.org</a>
+</div>
+
+<script>
+let currentSetAside = '2050';
+let unitStates = [];
+let totalUnits = 40;
+let aitDesignations = [];
+
+function selectSetAside(sa) {
+  currentSetAside = sa;
+  ['2050','4060','ait'].forEach(k => {
+    document.getElementById('card-'+k).classList.toggle('active', k===sa);
+  });
+  initUnits();
+}
+
+function updateUnits() {
+  totalUnits = +document.getElementById('totalUnits').value;
+  document.getElementById('totalUnits-out').textContent = totalUnits;
+  initUnits();
+}
+
+function initUnits() {
+  unitStates = Array(totalUnits).fill('market');
+  if (currentSetAside === 'ait') {
+    aitDesignations = Array(totalUnits).fill(20);
+    const minAffordable = Math.ceil(totalUnits * 0.4);
+    for (let i = 0; i < minAffordable; i++) unitStates[i] = 'affordable';
+  }
+  renderUnits();
+}
+
+function toggleUnit(i) {
+  if (currentSetAside === 'ait') {
+    if (unitStates[i] === 'market') {
+      unitStates[i] = 'affordable';
+      aitDesignations[i] = 20;
+    } else {
+      // Cycle through AMI levels
+      const levels = [20, 30, 40, 60, 80];
+      const curr = aitDesignations[i];
+      const idx = levels.indexOf(curr);
+      if (idx < levels.length - 1) {
+        aitDesignations[i] = levels[idx + 1];
+      } else {
+        unitStates[i] = 'market';
+        aitDesignations[i] = 20;
+      }
+    }
+  } else {
+    unitStates[i] = unitStates[i] === 'market' ? 'affordable' : 'market';
+  }
+  renderUnits();
+}
+
+function renderUnits() {
+  const affordable = unitStates.filter(s => s === 'affordable').length;
+  const pct = (affordable / totalUnits * 100).toFixed(0);
+
+  let unitHTML = '';
+  if (currentSetAside === 'ait') {
+    unitHTML = `<div class="ait-legend">
+      <div class="ait-swatch"><div class="ait-sq" style="background:#E1F5EE;border:1px solid #9FE1CB"></div>20% AMI</div>
+      <div class="ait-swatch"><div class="ait-sq" style="background:#C5EDD8"></div>30% AMI</div>
+      <div class="ait-swatch"><div class="ait-sq" style="background:#9FE1CB"></div>40% AMI</div>
+      <div class="ait-swatch"><div class="ait-sq" style="background:#7ECFA8"></div>60% AMI</div>
+      <div class="ait-swatch"><div class="ait-sq" style="background:#5DCAA5"></div>80% AMI</div>
+      <div class="ait-swatch"><div class="ait-sq" style="background:#fff;border:1.5px solid rgba(26,58,92,0.2)"></div>Market</div>
+    </div>`;
+    unitHTML += '<div class="unit-grid">';
+    unitStates.forEach((s, i) => {
+      const ami = aitDesignations[i];
+      const cls = s === 'market' ? 'market'
+        : ami===20?'ami-20':ami===30?'ami-30':ami===40?'ami-40':ami===80?'ami-80':'ami-60';
+      const lbl = s === 'market' ? 'MR' : ami+'%';
+      unitHTML += `<div class="unit-slot ${cls}" onclick="toggleUnit(${i})" title="Click to cycle AMI">${lbl}</div>`;
+    });
+    unitHTML += '</div>';
+  } else {
+    unitHTML = '<div class="unit-grid">';
+    unitStates.forEach((s, i) => {
+      unitHTML += `<div class="unit-slot ${s}" onclick="toggleUnit(${i})">${s==='affordable'?'A':'MR'}</div>`;
+    });
+    unitHTML += '</div>';
+  }
+  unitHTML += `<div style="font-size:12px;color:var(--muted)">Click units to toggle. <strong style="color:var(--navy)">${affordable}</strong> of ${totalUnits} units affordable (${pct}%).</div>`;
+  document.getElementById('unit-builder').innerHTML = unitHTML;
+
+  // Compliance check
+  let compHTML = '', statusHTML = '', pass = false;
+
+  if (currentSetAside === '2050') {
+    const minReq = Math.ceil(totalUnits * 0.2);
+    pass = affordable >= minReq;
+    compHTML = `
+      <div class="cb-row"><div class="cb-label">Affordable units</div><div class="cb-value ${pass?'pass':'fail'}">${affordable} of ${totalUnits} (${pct}%)</div></div>
+      <div class="cb-row"><div class="cb-label">Minimum required (20%)</div><div class="cb-value">${minReq} units</div></div>
+      <div class="cb-row"><div class="cb-label">AMI cap on all restricted units</div><div class="cb-value">50% AMI</div></div>`;
+    statusHTML = pass ? '✓ Meets 20/50 minimum set-aside' : `✗ Needs ${minReq - affordable} more affordable units`;
+  } else if (currentSetAside === '4060') {
+    const minReq = Math.ceil(totalUnits * 0.4);
+    pass = affordable >= minReq;
+    compHTML = `
+      <div class="cb-row"><div class="cb-label">Affordable units</div><div class="cb-value ${pass?'pass':'fail'}">${affordable} of ${totalUnits} (${pct}%)</div></div>
+      <div class="cb-row"><div class="cb-label">Minimum required (40%)</div><div class="cb-value">${minReq} units</div></div>
+      <div class="cb-row"><div class="cb-label">AMI cap on all restricted units</div><div class="cb-value">60% AMI</div></div>`;
+    statusHTML = pass ? '✓ Meets 40/60 minimum set-aside' : `✗ Needs ${minReq - affordable} more affordable units`;
+  } else {
+    const minReq = Math.ceil(totalUnits * 0.4);
+    const affUnits = unitStates.map((s,i) => s==='affordable'?aitDesignations[i]:null).filter(v=>v!==null);
+    const avgAmi = affUnits.length ? (affUnits.reduce((a,b)=>a+b,0)/affUnits.length).toFixed(1) : 0;
+    pass = affordable >= minReq && +avgAmi <= 60;
+    compHTML = `
+      <div class="cb-row"><div class="cb-label">Designated affordable units</div><div class="cb-value ${affordable>=minReq?'pass':'fail'}">${affordable} of ${totalUnits} (${pct}%)</div></div>
+      <div class="cb-row"><div class="cb-label">Minimum required (40%)</div><div class="cb-value">${minReq} units</div></div>
+      <div class="cb-row"><div class="cb-label">Average AMI across designated units</div><div class="cb-value ${+avgAmi<=60?'pass':'fail'}">${avgAmi}% AMI ${+avgAmi<=60?'≤60% ✓':'> 60% ✗'}</div></div>`;
+    statusHTML = pass ? '✓ Meets Average Income Test' : +avgAmi > 60 ? `✗ Average AMI (${avgAmi}%) exceeds 60% cap` : `✗ Needs ${minReq - affordable} more designated units`;
+  }
+
+  document.getElementById('compliance-bar').innerHTML = compHTML;
+  document.getElementById('status-banner').className = 'status-banner ' + (pass?'pass':'fail');
+  document.getElementById('status-banner').textContent = statusHTML;
+}
+
+initUnits();
+</script>
+</body>
+</html>

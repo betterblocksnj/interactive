@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIHTC Crowd-Out — Better Blocks NJ</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #1A3A5C; --teal: #7ECFA8; --teal-dark: #3A7D8C;
+    --offwhite: #F5F3EE; --text: #1a1a1a; --muted: #5a5a5a;
+    --border: rgba(26,58,92,0.15); --bg2: #f0ede8;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--offwhite); color: var(--text); padding: 1.25rem; font-size: 15px; }
+  .widget-header { display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--navy); padding-bottom: 10px; margin-bottom: 1.25rem; }
+  .logo-bar { width: 6px; height: 28px; background: var(--teal); border-radius: 2px; flex-shrink: 0; }
+  .widget-header h2 { font-size: 15px; font-weight: 600; color: var(--navy); }
+  .brand { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .pill { font-size: 12px; padding: 5px 13px; border-radius: 20px; border: 1px solid rgba(26,58,92,0.3); background: var(--offwhite); color: var(--muted); cursor: pointer; font-weight: 500; }
+  .pill:hover { background: var(--bg2); }
+  .pill.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .ctrl-lbl { font-size: 12px; color: var(--muted); margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .ctrl-lbl strong { font-size: 14px; font-weight: 600; color: var(--navy); }
+  input[type=range] { width: 100%; accent-color: var(--navy); }
+  .axis-hint { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 0.75rem; font-size: 12px; color: var(--muted); align-items: center; }
+  .li { display: flex; align-items: center; gap: 5px; }
+  .chart-wrap { position: relative; width: 100%; height: 290px; margin-bottom: 0.75rem; }
+  .results { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 1rem; }
+  .rc { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .rc .rl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .rc .rv { font-size: 18px; font-weight: 700; color: var(--navy); }
+  .rc.accent { background: var(--navy); border-color: var(--navy); }
+  .rc.accent .rl { color: rgba(255,255,255,0.55); }
+  .rc.accent .rv { color: var(--teal); }
+  .intuition { background: var(--bg2); border-left: 3px solid var(--navy); border-radius: 0 6px 6px 0; padding: 10px 13px; font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+  .src { font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.75rem; line-height: 1.6; }
+  .src a { color: var(--teal-dark); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="widget-header">
+  <div class="logo-bar"></div>
+  <h2>LIHTC Crowd-Out: Supply &amp; Demand Incidence</h2>
+  <span class="brand">Better Blocks NJ</span>
+</div>
+
+<div class="pills">
+  <button class="pill" id="p-sw" onclick="load('sw')">Sinai–Waldfogel (2005)</button>
+  <button class="pill" id="p-er" onclick="load('er')">Eriksen–Rosenthal (2010)</button>
+  <button class="pill" id="p-bsm" onclick="load('bsm')">Baum-Snow–Marion (2009)</button>
+  <button class="pill active" id="p-custom" onclick="load('custom')">Custom</button>
+</div>
+
+<div class="ctrl-grid">
+  <div>
+    <div class="ctrl-lbl">Supply elasticity <strong id="se-lbl">1.0</strong></div>
+    <input type="range" id="se" min="0.1" max="5" step="0.1" value="1.0" oninput="onSlide()">
+    <div class="axis-hint"><span>inelastic (vertical S)</span><span>elastic (flat S)</span></div>
+  </div>
+  <div>
+    <div class="ctrl-lbl">Demand elasticity <strong id="de-lbl">1.0</strong></div>
+    <input type="range" id="de" min="0.1" max="5" step="0.1" value="1.0" oninput="onSlide()">
+    <div class="axis-hint"><span>inelastic (vertical D)</span><span>elastic (flat D)</span></div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="li"><svg width="24" height="3"><line x1="0" y1="1.5" x2="24" y2="1.5" stroke="#1A3A5C" stroke-width="2.5"/></svg> S (private supply)</div>
+  <div class="li"><svg width="28" height="3"><line x1="0" y1="1.5" x2="28" y2="1.5" stroke="#1A3A5C" stroke-width="2" stroke-dasharray="5,3"/></svg> S' (gross of subsidy)</div>
+  <div class="li"><svg width="24" height="3"><line x1="0" y1="1.5" x2="24" y2="1.5" stroke="#666" stroke-width="2"/></svg> D</div>
+  <div class="li"><svg width="10" height="10"><circle cx="5" cy="5" r="4.5" fill="#1A3A5C"/></svg> Q*</div>
+  <div class="li"><svg width="10" height="10"><circle cx="5" cy="5" r="4.5" fill="#7ECFA8"/></svg> Q^S</div>
+</div>
+
+<div class="chart-wrap"><canvas id="ic" role="img" aria-label="LIHTC supply and demand incidence diagram"></canvas></div>
+
+<div class="results" id="results"></div>
+
+<div class="intuition" id="intuition"></div>
+
+<div class="src">
+  Crowd-out formula: net additionality = E<sub>s</sub>/(E<sub>s</sub>+E<sub>d</sub>).
+  Full crowd-out requires elastic supply <em>and</em> inelastic demand simultaneously.
+  Sources: <a href="https://doi.org/10.1016/j.jpubeco.2004.12.001" target="_blank">Sinai &amp; Waldfogel (2005)</a> ·
+  <a href="https://doi.org/10.1016/j.jpubeco.2010.07.002" target="_blank">Eriksen &amp; Rosenthal (2010)</a> ·
+  <a href="https://doi.org/10.1016/j.jpubeco.2009.01.001" target="_blank">Baum-Snow &amp; Marion (2009)</a>
+  · <a href="https://betterblocksnj.org" target="_blank">betterblocksnj.org</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let chart = null;
+const presets = {
+  sw:  { se: 2.0, de: 1.5 },
+  er:  { se: 4.5, de: 0.3 },
+  bsm: { se: 0.4, de: 2.0 }
+};
+
+function load(key) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('p-' + key).classList.add('active');
+  if (key !== 'custom') {
+    document.getElementById('se').value = presets[key].se;
+    document.getElementById('de').value = presets[key].de;
+  }
+  draw();
+}
+
+function onSlide() {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('p-custom').classList.add('active');
+  draw();
+}
+
+function eLabel(v) {
+  if (v < 0.5) return 'inelastic';
+  if (v < 1.5) return 'moderate';
+  if (v < 3) return 'elastic';
+  return 'highly elastic';
+}
+
+function draw() {
+  const se = +document.getElementById('se').value;
+  const de = +document.getElementById('de').value;
+  document.getElementById('se-lbl').textContent = se.toFixed(1);
+  document.getElementById('de-lbl').textContent = de.toFixed(1);
+
+  const sub = 20, Qeq = 50, Peq = 50;
+  const sSlope = 1.5 / se;
+  const dSlope = -1.5 / de;
+  const Qnew = Qeq + (sSlope * sub) / (sSlope - dSlope);
+  const Pd = Peq + dSlope * (Qnew - Qeq);
+  const Ps = Peq + sSlope * (Qnew - Qeq);
+  const netUnits = Math.round(Qnew - Qeq);
+  const crowdOutPct = Math.max(0, Math.round((1 - (Qnew - Qeq) / sub) * 100));
+  const addPct = Math.min(100, Math.round((Qnew - Qeq) / sub * 100));
+
+  const Qmin = 10, Qmax = 90;
+  const pts = 30;
+  const qArr = Array.from({length:pts}, (_,i) => Qmin + i*(Qmax-Qmin)/(pts-1));
+  const sP  = qArr.map(q => ({x:+q.toFixed(2), y:+(Peq+sSlope*(q-Qeq)).toFixed(2)})).filter(p=>p.y>=5&&p.y<=95);
+  const sP2 = qArr.map(q => ({x:+q.toFixed(2), y:+(Peq+sSlope*(q-Qeq-sub)).toFixed(2)})).filter(p=>p.y>=5&&p.y<=95);
+  const dP  = qArr.map(q => ({x:+q.toFixed(2), y:+(Peq+dSlope*(q-Qeq)).toFixed(2)})).filter(p=>p.y>=5&&p.y<=95);
+  const h = {showLine:true, borderColor:'rgba(26,58,92,0.2)', borderWidth:1, borderDash:[3,3], pointRadius:0, fill:false};
+
+  if (chart) { chart.destroy(); chart = null; }
+  chart = new Chart(document.getElementById('ic'), {
+    type: 'scatter',
+    data: { datasets: [
+      {data:sP, showLine:true, borderColor:'#1A3A5C', borderWidth:2.5, pointRadius:0, fill:false, tension:0},
+      {data:sP2, showLine:true, borderColor:'#1A3A5C', borderWidth:2, borderDash:[6,4], pointRadius:0, fill:false, tension:0},
+      {data:dP, showLine:true, borderColor:'#555', borderWidth:2, pointRadius:0, fill:false, tension:0},
+      {data:[{x:Qeq,y:Peq}], pointRadius:8, pointBackgroundColor:'#1A3A5C', showLine:false},
+      {data:[{x:+Qnew.toFixed(1),y:+Pd.toFixed(1)}], pointRadius:8, pointBackgroundColor:'#7ECFA8', showLine:false},
+      {data:[{x:Qmin,y:Peq},{x:Qeq,y:Peq}], ...h},
+      {data:[{x:Qmin,y:+Ps.toFixed(1)},{x:+Qnew.toFixed(1),y:+Ps.toFixed(1)}], ...h},
+      {data:[{x:Qmin,y:+Pd.toFixed(1)},{x:+Qnew.toFixed(1),y:+Pd.toFixed(1)}], ...h},
+      {data:[{x:Qeq,y:5},{x:Qeq,y:Peq}], ...h},
+      {data:[{x:+Qnew.toFixed(1),y:5},{x:+Qnew.toFixed(1),y:+Pd.toFixed(1)}], ...h},
+    ]},
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:{duration:250},
+      plugins: {
+        legend:{display:false},
+        tooltip:{
+          filter: ctx => ctx.datasetIndex<=4,
+          callbacks:{ label: ctx => ['S','S\'','D','Q* (original)','Q^S (new)'][ctx.datasetIndex] || '' }
+        }
+      },
+      scales: {
+        x: { min:Qmin, max:Qmax, grid:{color:'rgba(0,0,0,0.04)'},
+          title:{display:true, text:'Quantity of housing units', color:'#777', font:{size:12}},
+          ticks:{color:'#777', font:{size:11}, maxTicksLimit:5,
+            callback: v => Math.abs(v-Qeq)<1?'Q*': Math.abs(v-Qnew)<1?'Q^S': ''}
+        },
+        y: { min:5, max:95, grid:{color:'rgba(0,0,0,0.04)'},
+          title:{display:true, text:'Price (rent)', color:'#777', font:{size:12}},
+          ticks:{color:'#777', font:{size:11}, maxTicksLimit:6,
+            callback: v => Math.abs(v-Peq)<2?'P*': Math.abs(v-Ps)<2?'Pˢ': Math.abs(v-Pd)<2?'P^D': ''}
+        }
+      }
+    }
+  });
+
+  document.getElementById('results').innerHTML = `
+    <div class="rc"><div class="rl">Subsidy size</div><div class="rv">${sub} units</div></div>
+    <div class="rc"><div class="rl">Crowd-out</div><div class="rv" style="color:${crowdOutPct>66?'#c0392b':'#1A3A5C'}">${crowdOutPct}%</div></div>
+    <div class="rc accent"><div class="rl">Net new units</div><div class="rv">${netUnits} <span style="font-size:13px;opacity:0.8">(${addPct}%)</span></div></div>`;
+
+  const sl = eLabel(se), dl = eLabel(de);
+  let msg = '';
+  if (se >= 3 && de <= 0.5) msg = 'Near-full crowd-out. Private developers pull back sharply; renters barely respond to price changes. Each subsidized unit displaces roughly one market-rate unit.';
+  else if (se <= 0.6) msg = 'Inelastic supply — private market can\'t easily add units regardless. Subsidy mostly capitalizes into lower rent prices rather than new units.';
+  else if (de <= 0.5) msg = 'Inelastic demand — renters are price-insensitive. Even when supply shifts right, quantity barely changes. Subsidy captured in price wedge.';
+  else msg = sl.charAt(0).toUpperCase()+sl.slice(1)+' supply, '+dl+' demand. '+addPct+'% net additionality — a meaningful share of subsidized units represent genuine additions to the housing stock.';
+  document.getElementById('intuition').textContent = msg;
+}
+
+draw();
+</script>
+</body>
+</html>

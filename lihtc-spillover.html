@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diamond &amp; McQuade Spillover Effects — Better Blocks NJ</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #1A3A5C; --teal: #7ECFA8; --teal-dark: #0F6E56;
+    --offwhite: #F5F3EE; --muted: #5a5a5a;
+    --border: rgba(26,58,92,0.15); --bg2: #f0ede8;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--offwhite); color: #1a1a1a; padding: 1.25rem; font-size: 15px; }
+  .widget-header { display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--navy); padding-bottom: 10px; margin-bottom: 1.25rem; }
+  .logo-bar { width: 6px; height: 28px; background: var(--teal); border-radius: 2px; flex-shrink: 0; }
+  .widget-header h2 { font-size: 15px; font-weight: 600; color: var(--navy); }
+  .brand { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 0.85rem; font-size: 12px; color: var(--muted); align-items: center; }
+  .li { display: flex; align-items: center; gap: 5px; }
+  .lsq { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .radial-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
+  .finding { background: var(--bg2); border-left: 3px solid var(--navy); border-radius: 0 6px 6px 0; padding: 10px 13px; font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+  .finding strong { color: var(--navy); font-weight: 600; }
+  .src { font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.75rem; line-height: 1.6; }
+  .src a { color: var(--teal-dark); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="widget-header">
+  <div class="logo-bar"></div>
+  <h2>Diamond &amp; McQuade (2019): Spillover Effects</h2>
+  <span class="brand">Better Blocks NJ</span>
+</div>
+
+<div class="legend">
+  <div class="li"><div class="lsq" style="background:#7ECFA8"></div> Low-income neighborhood</div>
+  <div class="li"><div class="lsq" style="background:#c0392b;opacity:0.8"></div> Higher-income neighborhood</div>
+  <div style="font-size:11px;color:var(--muted);margin-left:4px">Click rings to explore distance bands</div>
+</div>
+
+<div class="radial-wrap">
+  <svg id="radialSvg" viewBox="0 0 460 370" width="100%" style="max-width:460px" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="finding" id="finding">
+  <strong>Within 0.1 mile:</strong> Effects are strongest close to the development. In low-income neighborhoods, nearby homes see a +6.5% price increase — the amenity effect of new investment replacing blight. In higher-income neighborhoods the same proximity produces a −2.5% decline, which Eriksen &amp; Yang (2022) attribute to density effects rather than affordability stigma.
+</div>
+
+<div class="src">
+  Source: <a href="https://doi.org/10.1086/701354" target="_blank">Diamond &amp; McQuade, <em>Journal of Political Economy</em> 127(3), 2019</a>.
+  Nonparametric difference-in-differences across 129 counties in 15 states.
+  Note: Eriksen &amp; Yang (2022) find the negative effect in higher-income areas applies equally to unsubsidized multifamily and dissipates when controlling for population density.
+  · <a href="https://betterblocksnj.org" target="_blank">betterblocksnj.org</a>
+</div>
+
+<script>
+const low  = [6.5, 3.2, 1.4];
+const high = [-2.5, -1.1, -0.3];
+const findings = [
+  '<strong>Within 0.1 mile:</strong> Effects are strongest closest to the development. In low-income neighborhoods, nearby homes see a +6.5% price increase — the amenity effect of new investment replacing blight. In higher-income neighborhoods the same proximity produces a −2.5% decline, which Eriksen &amp; Yang (2022) attribute to density effects rather than affordability stigma.',
+  '<strong>0.1 – 0.25 mile:</strong> Effects moderate with distance. Low-income neighborhoods still see meaningful appreciation (+3.2%). Higher-income neighborhoods show a smaller negative effect (−1.1%), consistent with localized density concerns diminishing with distance.',
+  '<strong>0.25 – 0.5 mile:</strong> At half a mile, impacts are minimal. Low-income neighborhoods retain a small positive spillover (+1.4%); higher-income neighborhoods near-neutral (−0.3%), suggesting LIHTC effects are highly localized.'
+];
+
+function drawRadial() {
+  const svg = document.getElementById('radialSvg');
+  svg.innerHTML = '';
+  const cx = 225, cy = 190;
+  const rings = [
+    { r: 130, low: low[2], high: high[2], label: '0.5 mi', idx: 2 },
+    { r: 88,  low: low[1], high: high[1], label: '0.25 mi', idx: 1 },
+    { r: 48,  low: low[0], high: high[0], label: '0.1 mi', idx: 0 },
+  ];
+
+  rings.forEach(ring => {
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',ring.r);
+    c.setAttribute('fill','none'); c.setAttribute('stroke','rgba(26,58,92,0.12)');
+    c.setAttribute('stroke-width','1'); c.setAttribute('stroke-dasharray','4 3');
+    svg.appendChild(c);
+    const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x',cx+ring.r+5); lbl.setAttribute('y',cy+4);
+    lbl.setAttribute('font-size','11'); lbl.setAttribute('fill','#888');
+    lbl.textContent = ring.label; svg.appendChild(lbl);
+  });
+
+  // LIHTC center
+  const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dot.setAttribute('cx',cx); dot.setAttribute('cy',cy); dot.setAttribute('r',20);
+  dot.setAttribute('fill','#1A3A5C'); svg.appendChild(dot);
+  const dotLbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+  dotLbl.setAttribute('x',cx); dotLbl.setAttribute('y',cy+4);
+  dotLbl.setAttribute('text-anchor','middle'); dotLbl.setAttribute('font-size','9');
+  dotLbl.setAttribute('font-weight','600'); dotLbl.setAttribute('fill','#fff');
+  dotLbl.textContent = 'LIHTC'; svg.appendChild(dotLbl);
+
+  // Horizon line
+  const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',cx-140); line.setAttribute('y1',cy);
+  line.setAttribute('x2',cx+140); line.setAttribute('y2',cy);
+  line.setAttribute('stroke','rgba(26,58,92,0.3)'); line.setAttribute('stroke-width','1');
+  svg.appendChild(line);
+
+  // Low-income arcs (top half)
+  rings.forEach((ring, i) => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', () => { document.getElementById('finding').innerHTML = findings[ring.idx]; });
+
+    const arc = document.createElementNS('http://www.w3.org/2000/svg','path');
+    arc.setAttribute('d',`M ${cx-ring.r} ${cy} A ${ring.r} ${ring.r} 0 0 1 ${cx+ring.r} ${cy}`);
+    arc.setAttribute('fill','none'); arc.setAttribute('stroke','#7ECFA8');
+    arc.setAttribute('stroke-width','6'); arc.setAttribute('opacity', 0.3 + i*0.3 + '');
+    g.appendChild(arc);
+
+    const v = document.createElementNS('http://www.w3.org/2000/svg','text');
+    v.setAttribute('x',cx); v.setAttribute('y',cy-ring.r+20);
+    v.setAttribute('text-anchor','middle'); v.setAttribute('font-size','14');
+    v.setAttribute('font-weight','700'); v.setAttribute('fill','#0F6E56');
+    v.textContent = '+'+ring.low+'%';
+    g.appendChild(v);
+    svg.appendChild(g);
+  });
+
+  // Higher-income arcs (bottom half)
+  rings.forEach((ring, i) => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', () => { document.getElementById('finding').innerHTML = findings[ring.idx]; });
+
+    const arc = document.createElementNS('http://www.w3.org/2000/svg','path');
+    arc.setAttribute('d',`M ${cx-ring.r} ${cy} A ${ring.r} ${ring.r} 0 0 0 ${cx+ring.r} ${cy}`);
+    arc.setAttribute('fill','none'); arc.setAttribute('stroke','#c0392b');
+    arc.setAttribute('stroke-width','6'); arc.setAttribute('opacity', 0.3 + i*0.3 + '');
+    g.appendChild(arc);
+
+    const v = document.createElementNS('http://www.w3.org/2000/svg','text');
+    v.setAttribute('x',cx); v.setAttribute('y',cy+ring.r-10);
+    v.setAttribute('text-anchor','middle'); v.setAttribute('font-size','14');
+    v.setAttribute('font-weight','700'); v.setAttribute('fill','#993C1D');
+    v.textContent = ring.high+'%';
+    g.appendChild(v);
+    svg.appendChild(g);
+  });
+
+  // Neighborhood labels — positioned outside the outermost ring (r=130), above and below
+  const lowTag = document.createElementNS('http://www.w3.org/2000/svg','text');
+  lowTag.setAttribute('x',cx); lowTag.setAttribute('y',cy-140);
+  lowTag.setAttribute('text-anchor','middle'); lowTag.setAttribute('font-size','12');
+  lowTag.setAttribute('font-weight','600'); lowTag.setAttribute('fill','#0F6E56');
+  lowTag.textContent = 'Low-income neighborhoods'; svg.appendChild(lowTag);
+
+  const hiTag = document.createElementNS('http://www.w3.org/2000/svg','text');
+  hiTag.setAttribute('x',cx); hiTag.setAttribute('y',cy+152);
+  hiTag.setAttribute('text-anchor','middle'); hiTag.setAttribute('font-size','12');
+  hiTag.setAttribute('font-weight','600'); hiTag.setAttribute('fill','#993C1D');
+  hiTag.textContent = 'Higher-income neighborhoods'; svg.appendChild(hiTag);
+}
+
+drawRadial();
+</script>
+</body>
+</html>
