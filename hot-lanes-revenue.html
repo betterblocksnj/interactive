@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NJ HOT Lanes Revenue Estimator | Better Blocks NJ</title>
+</head>
+<body>
+<h2 class="sr-only">Interactive estimator for HOT lane dynamic tolling revenue across six New Jersey highway corridors for NJ Transit funding</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1rem 0;max-width:680px}
+.corridors{display:flex;flex-direction:column;gap:1.25rem;margin-bottom:2rem}
+.corridor{background:var(--color-background-primary,#fff);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.15));border-radius:var(--border-radius-lg,12px);padding:1rem 1.25rem}
+.corridor-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.corridor-name{font-size:15px;font-weight:500}
+.corridor-rev{font-size:17px;font-weight:500;color:#1A3A5C}
+.param-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px}
+.param-row label{min-width:210px;color:var(--color-text-secondary,#666)}
+.param-row input[type=range]{flex:1}
+.param-row .val{min-width:70px;text-align:right;font-weight:500;font-size:13px}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:2rem}
+.metric{background:var(--color-background-secondary,#f5f5f0);border-radius:var(--border-radius-md,8px);padding:1rem}
+.metric-label{font-size:12px;color:var(--color-text-secondary,#666);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+.metric-value{font-size:22px;font-weight:500}
+.metric-value.teal{color:#1D9E75}
+.metric-value.navy{color:#1A3A5C}
+.global-controls{margin-bottom:2rem}
+.gc-section{margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.08))}
+.gc-section:last-child{border-bottom:none}
+.gc-section h3{font-size:14px;font-weight:500;margin-bottom:12px}
+.gc-section h4{font-size:13px;font-weight:500;margin-bottom:8px;color:var(--color-text-secondary,#666)}
+.note{font-size:12px;color:var(--color-text-secondary,#666);margin-top:1.5rem;line-height:1.6;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.15));padding-top:1rem}
+details summary{font-size:12px;color:var(--color-text-secondary,#888);cursor:pointer;list-style:none}
+details summary::-webkit-details-marker{display:none}
+.chart-wrap{position:relative;width:100%;height:320px;margin-bottom:1.5rem}
+.breakdown{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;font-size:12px}
+.breakdown-item{display:flex;justify-content:space-between;padding:3px 8px;background:var(--color-background-secondary,#f5f5f0);border-radius:var(--border-radius-md,8px)}
+.breakdown-item .lbl{color:var(--color-text-secondary,#666)}
+.breakdown-item .num{font-weight:500}
+.legend{display:flex;gap:16px;margin-bottom:8px;font-size:12px;color:var(--color-text-secondary,#666)}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend .swatch{width:10px;height:10px;border-radius:2px}
+.section-label{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;color:var(--color-text-secondary,#888);margin:1.5rem 0 0.5rem;padding-bottom:4px;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,0.15))}
+.infra-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md,8px);margin-left:8px;font-weight:400}
+.tag-separated{background:#E1F5EE;color:#0F6E56}
+.tag-designated{background:#FAEEDA;color:#854F0B}
+.day-summary{font-size:12px;color:var(--color-text-secondary,#666);margin-bottom:1.5rem;padding:8px 12px;background:var(--color-background-secondary,#f5f5f0);border-radius:var(--border-radius-md,8px)}
+</style>
+
+<div class="wrap">
+
+<div class="summary">
+  <div class="metric"><div class="metric-label">Total gross revenue</div><div class="metric-value navy" id="totalRev">—</div></div>
+  <div class="metric"><div class="metric-label">To NJ Transit</div><div class="metric-value teal" id="transitRev">—</div></div>
+  <div class="metric"><div class="metric-label">Weekday / Weekend split</div><div class="metric-value" id="splitRev" style="font-size:14px">—</div></div>
+  <div class="metric"><div class="metric-label">Average vehicles tolled per day</div><div class="metric-value" id="totalVeh">—</div></div>
+</div>
+
+<div class="global-controls">
+  <div class="gc-section">
+    <h3>Revenue and schedule</h3>
+    <div class="param-row"><label>NJ Transit revenue share</label><input type="range" min="50" max="100" step="5" value="80" id="transitPct" oninput="update()"><span class="val" id="transitPctVal">80%</span></div>
+    <div class="day-summary">365-day program: <strong id="wkdayCount">252</strong> weekdays + <strong id="wkendCount">113</strong> weekends/holidays per year</div>
+  </div>
+
+  <div class="gc-section">
+    <h4>Weekday tolling <span style="font-size:11px;font-weight:400;color:var(--color-text-secondary,#888)">— 8 hrs peak + 16 hrs off-peak = 24 hrs</span></h4>
+    <div class="param-row"><label>Off-peak toll (% of peak rate)</label><input type="range" min="10" max="60" step="5" value="30" id="offPeakPct" oninput="update()"><span class="val" id="offPeakPctVal">30%</span></div>
+    <div class="param-row"><label>Off-peak opt-in (% of peak rate)</label><input type="range" min="20" max="100" step="5" value="50" id="offPeakOptPct" oninput="update()"><span class="val" id="offPeakOptPctVal">50%</span></div>
+  </div>
+
+  <div class="gc-section">
+    <h4>Weekend / Holiday tolling <span style="font-size:11px;font-weight:400;color:var(--color-text-secondary,#888)">— same 8/16 hr split</span></h4>
+    <div class="param-row"><label>Weekend traffic (% of weekday)</label><input type="range" min="50" max="100" step="5" value="75" id="weekendTrafficPct" oninput="update()"><span class="val" id="weekendTrafficPctVal">75%</span></div>
+    <div class="param-row"><label>Weekend avg toll (% of weekday peak rate)</label><input type="range" min="20" max="100" step="5" value="60" id="weekendTollPct" oninput="update()"><span class="val" id="weekendTollPctVal">60%</span></div>
+    <div class="param-row"><label>Weekend opt-in rate (% of weekday rate)</label><input type="range" min="20" max="100" step="5" value="75" id="weekendOptPct" oninput="update()"><span class="val" id="weekendOptPctVal">75%</span></div>
+  </div>
+</div>
+
+<div class="legend">
+  <span><span class="swatch" style="background:#1A3A5C"></span>Weekday</span>
+  <span><span class="swatch" style="background:#7ECFA8"></span>Weekend</span>
+</div>
+<div class="chart-wrap"><canvas id="revChart" role="img" aria-label="Stacked bar chart of annual HOT lane revenue across six NJ corridors split by weekday and weekend">Revenue by corridor</canvas></div>
+
+<div class="corridors" id="corridors"></div>
+
+<div class="note">
+  <strong>Sources and methodology:</strong> AADT and peak-hour volume defaults: NJ Turnpike inner roadway (Exits 6–14) from Steer Davies Gleave / CRA International, <em>New Jersey Traffic and Revenue Study — NJ Turnpike Asset Appraisal</em> (January 2008), prepared for NJ Treasury; peak-hour counts at Exit 14C segment grown at ~1%/yr through 2019 with post-Covid normalization. Garden State Parkway corridors from Steer Davies Gleave / CRA International, <em>New Jersey Traffic and Revenue Study — Garden State Parkway Asset Appraisal</em> (January 2008), same study; AM peak-hour directional volumes and Level of Service analysis from Tables 2.8–2.9 (p. 25–26): Essex–Bergen at 87% of LOS D service volume is the most congested GSP segment; Raritan–Union at 71% with northbound speeds of 51.7 mph. GSP express/local infrastructure (Exits 102–125) confirmed in Section 2.10. I-78 and I-80 from NJDOT segment counts (2024 Traffic Viewer). 365-day tolling with separate weekday and weekend parameters. Weekday peak assumes 8–10% of AADT per hour at full dynamic toll rates. Off-peak applies reduced toll and opt-in rates. Weekend models lower volumes with distinct peak-hour patterns (e.g., midday shore traffic on GSP South, Sunday evening returns). Express lane opt-in rates benchmarked to Virginia I-66 and I-495 systems (20–30%). Average tolls from Virginia data ($5–$8 avg, peaks above $30). Corridors tagged "physically separated" have existing express/local infrastructure. "Lane designation" corridors require restriping 1–2 GP lanes as HOT. Pull segment-level AADT from NJDOT's Traffic Viewer for precise local inputs.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const WEEKDAYS_PER_YEAR = 252;
+const WEEKENDS_PER_YEAR = 113;
+
+// GSP data from Steer Davies Gleave GSP Asset Appraisal (2008):
+// - Asbury Park–Raritan: 8,807 veh/hr AM peak observed (Table 2.8), 12,375 LOS D service vol (71%)
+//   NB speed 65.8 mph (off-peak capacity exists for diversion → higher elasticity)
+//   Express/local physically separated Exits 102–125 → prime HOT candidate
+// - Raritan–Union: 9,586 veh/hr AM peak (71% LOS D), NB speed 51.7 mph → congested
+// - Union–Essex: 7,817 veh/hr (76% LOS D), NB speed 45.0 mph → severe congestion
+// - Essex–Bergen: 6,320 veh/hr (87% LOS D) → most capacity-constrained GSP segment
+//   NB speed 47.1 mph; only 6–7 lanes, HOT designation harder but most need
+// AADT estimates back-calculated from peak-hour volumes (peak hr ≈ 9% of AADT for GSP northern sections)
+
+const corridors = [
+  {
+    id:'tpk', name:'NJ Turnpike (Exits 6–14, inner roadway)',
+    aadt:215000, peakPct:9, optIn:25, avgToll:7.00,
+    miles:'~30 mi', note:'Car-only inner lanes already physically separated',
+    infra:'separated', section:'Interstate corridors',
+
+  },
+  {
+    id:'i78', name:'I-78 (Rt 24 interchange to Newark Airport)',
+    aadt:155000, peakPct:9, optIn:22, avgToll:6.00,
+    miles:'~15 mi', note:'3+2 express/local configuration',
+    infra:'separated', section:'Interstate corridors',
+
+  },
+  {
+    id:'i80', name:'I-80 (I-287 to George Washington Bridge)',
+    aadt:148000, peakPct:10, optIn:20, avgToll:5.50,
+    miles:'~20 mi', note:'Two express/local segments in Bergen/Passaic',
+    infra:'separated', section:'Interstate corridors',
+
+  },
+  {
+    id:'gsp_s', name:'GSP South (Exits 102–125, Asbury Park to Raritan)',
+    // AM peak observed: 8,807 veh/hr → AADT ≈ 8807/0.09 ≈ 98K per direction → ~196K total
+    // Using 190K as conservative round figure, grown slightly from 2006 baseline
+    aadt:190000, peakPct:9, optIn:22, avgToll:5.50,
+    miles:'~23 mi', note:'Existing express/local split; 71% of LOS D; NB peak speed 65.8 mph',
+    infra:'separated', section:'Garden State Parkway',
+
+  },
+  {
+    id:'gsp_m', name:'GSP Mid (Exits 125–150, Raritan to Essex)',
+    // Raritan–Union: 9,586 veh/hr peak (71% LOS D, NB 51.7 mph)
+    // Union–Essex: 7,817 veh/hr (76% LOS D, NB 45.0 mph)
+    // 10–12 lanes in this section; designate 1–2 as HOT
+    // AADT ≈ 9586/0.09 ≈ 107K per direction → ~214K total (Raritan segment, heaviest)
+    aadt:210000, peakPct:9, optIn:18, avgToll:5.00,
+    miles:'~25 mi', note:'10–12 lanes; NB peak speeds 45–52 mph; designate 1–2 lanes as HOT',
+    infra:'designated', section:'Garden State Parkway',
+
+  },
+  {
+    id:'gsp_n', name:'GSP North (Exits 150–166, Essex to Bergen)',
+    // Essex–Bergen: 6,320 veh/hr (87% LOS D) — most constrained segment
+    // NB speed 47.1 mph; only 6–7 lanes total → 1 lane designation is aggressive
+    // AADT ≈ 6320/0.08 ≈ 79K per direction → ~158K total
+    aadt:155000, peakPct:8, optIn:15, avgToll:4.50,
+    miles:'~12 mi', note:'Most congested GSP segment (87% LOS D); only 6–7 lanes limits HOT viability',
+    infra:'designated', section:'Garden State Parkway',
+
+  }
+];
+
+const container = document.getElementById('corridors');
+let currentSection = '';
+corridors.forEach(c => {
+  if (c.section !== currentSection) {
+    currentSection = c.section;
+    const lbl = document.createElement('div');
+    lbl.className = 'section-label';
+    lbl.textContent = c.section;
+    container.appendChild(lbl);
+  }
+  const tagClass = c.infra === 'separated' ? 'tag-separated' : 'tag-designated';
+  const tagLabel = c.infra === 'separated' ? 'physically separated' : 'lane designation';
+  const div = document.createElement('div');
+  div.className = 'corridor';
+  div.innerHTML = `
+    <div class="corridor-header">
+      <div>
+        <div class="corridor-name">
+          ${c.name}
+          <span class="infra-tag ${tagClass}">${tagLabel}</span>
+        </div>
+        <div style="font-size:12px;color:var(--color-text-secondary,#666)">${c.miles} — ${c.note}</div>
+      </div>
+      <div class="corridor-rev" id="rev-${c.id}">—</div>
+    </div>
+    <div class="breakdown">
+      <div class="breakdown-item"><span class="lbl">Weekday</span><span class="num" id="pk-${c.id}">—</span></div>
+      <div class="breakdown-item"><span class="lbl">Weekend</span><span class="num" id="we-${c.id}">—</span></div>
+    </div>
+    <details>
+      <summary style="margin-top:10px">Adjust corridor parameters ▾</summary>
+      <div class="param-row" style="margin-top:10px">
+        <label>Annual avg daily traffic</label>
+        <input type="range" min="50000" max="450000" step="5000" value="${c.aadt}" id="aadt-${c.id}" oninput="update()">
+        <span class="val" id="aadtV-${c.id}">${(c.aadt/1000).toFixed(0)}K</span>
+      </div>
+      <div class="param-row">
+        <label>Express opt-in rate (%)</label>
+        <input type="range" min="5" max="50" step="1" value="${c.optIn}" id="opt-${c.id}" oninput="update()">
+        <span class="val" id="optV-${c.id}">${c.optIn}%</span>
+      </div>
+      <div class="param-row">
+        <label>Average dynamic toll (weekday)</label>
+        <input type="range" min="2" max="15" step="0.50" value="${c.avgToll}" id="toll-${c.id}" oninput="update()">
+        <span class="val" id="tollV-${c.id}">$${c.avgToll.toFixed(2)}</span>
+      </div>
+    </details>`;
+  container.appendChild(div);
+});
+
+document.getElementById('wkdayCount').textContent = WEEKDAYS_PER_YEAR;
+document.getElementById('wkendCount').textContent = WEEKENDS_PER_YEAR;
+
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const pkColors = ['#1A3A5C','#2C5F8A','#3A7CA5','#1a5c3a','#2d8a52','#4aaa6e'];
+const weColors = ['#7ECFA8','#9ADBB8','#B5E7CC','#7ECFA8','#9ADBB8','#B5E7CC'];
+
+const chart = new Chart(document.getElementById('revChart'), {
+  type:'bar',
+  data:{
+    labels:['Turnpike','I-78','I-80','GSP South\n(102–125)','GSP Mid\n(125–150)','GSP North\n(150–166)'],
+    datasets:[
+      { label:'Weekday ($M)', data:[0,0,0,0,0,0], backgroundColor:pkColors, stack:'s' },
+      { label:'Weekend ($M)', data:[0,0,0,0,0,0], backgroundColor:weColors, stack:'s' }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false, indexAxis:'y',
+    scales:{
+      x:{ stacked:true, beginAtZero:true, grid:{color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}, ticks:{ callback:v=>'$'+v+'M', color: isDark ? '#aaa' : '#666', font:{size:11} } },
+      y:{ stacked:true, grid:{display:false}, ticks:{ color: isDark ? '#ccc' : '#333', font:{size:12,weight:'500'}, autoSkip:false } }
+    },
+    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>ctx.dataset.label.split('(')[0].trim()+': $'+ctx.parsed.x.toFixed(1)+'M' } } }
+  }
+});
+
+function gv(id){ return +document.getElementById(id).value; }
+
+const PEAK_HRS    = 8;
+const OFFPEAK_HRS = 16;
+
+function calcRevenue(c) {
+  const aadt           = gv('aadt-'+c.id);
+  const optIn          = gv('opt-'+c.id) / 100;
+  const toll           = gv('toll-'+c.id);
+
+  const offPeakPct     = gv('offPeakPct')    / 100;
+  const offPeakOptPct  = gv('offPeakOptPct') / 100;
+
+  const weekendTraffic = gv('weekendTrafficPct') / 100;
+  const weekendTollPct = gv('weekendTollPct')    / 100;
+  const weekendOptPct  = gv('weekendOptPct')     / 100;
+
+  // Weekday: peak 8 hrs at full toll + off-peak 16 hrs at reduced toll and opt-in
+  const wkdayPeakRev   = aadt * (PEAK_HRS    / 24) * optIn                     * toll                  * WEEKDAYS_PER_YEAR;
+  const wkdayOffPkRev  = aadt * (OFFPEAK_HRS / 24) * (optIn * offPeakOptPct)   * (toll * offPeakPct)   * WEEKDAYS_PER_YEAR;
+  const wkdayRev       = wkdayPeakRev + wkdayOffPkRev;
+
+  // Weekend: same 8 peak / 16 off-peak split, scaled by traffic, toll, and opt-in adjustments
+  const wkendPeakRev   = aadt * weekendTraffic * (PEAK_HRS    / 24) * (optIn * weekendOptPct)                   * (toll * weekendTollPct)                 * WEEKENDS_PER_YEAR;
+  const wkendOffPkRev  = aadt * weekendTraffic * (OFFPEAK_HRS / 24) * (optIn * weekendOptPct * offPeakOptPct)   * (toll * weekendTollPct * offPeakPct)    * WEEKENDS_PER_YEAR;
+  const weekendRev     = wkendPeakRev + wkendOffPkRev;
+
+  const avgDailyVeh = Math.round(
+    (aadt * (PEAK_HRS/24) * optIn + aadt * (OFFPEAK_HRS/24) * optIn * offPeakOptPct) * (WEEKDAYS_PER_YEAR/365) +
+    (aadt * weekendTraffic * (PEAK_HRS/24) * optIn * weekendOptPct + aadt * weekendTraffic * (OFFPEAK_HRS/24) * optIn * weekendOptPct * offPeakOptPct) * (WEEKENDS_PER_YEAR/365)
+  );
+
+  return { weekday: wkdayRev, weekend: weekendRev, total: wkdayRev + weekendRev, avgDailyVeh };
+}
+
+function fmt(n) { return n >= 1e9 ? '$'+(n/1e9).toFixed(2)+'B' : n >= 1e6 ? '$'+(n/1e6).toFixed(0)+'M' : '$'+(n/1e3).toFixed(0)+'K'; }
+function sv(id,v){ const el = document.getElementById(id); if(el) el.textContent = v; }
+
+function update() {
+  sv('transitPctVal',    gv('transitPct')+'%');
+  sv('offPeakPctVal',    gv('offPeakPct')+'%');
+  sv('offPeakOptPctVal', gv('offPeakOptPct')+'%');
+  sv('weekendTrafficPctVal', gv('weekendTrafficPct')+'%');
+  sv('weekendTollPctVal',    gv('weekendTollPct')+'%');
+  sv('weekendOptPctVal',     gv('weekendOptPct')+'%');
+
+  const transitPct = gv('transitPct') / 100;
+  let totalAnnual=0, totalWkday=0, totalWkend=0, totalDailyVeh=0;
+  const wkD=[], weD=[];
+
+  corridors.forEach(c => {
+    sv('aadtV-'+c.id, (gv('aadt-'+c.id)/1000).toFixed(0)+'K');
+    sv('optV-'+c.id,  gv('opt-'+c.id)+'%');
+    sv('tollV-'+c.id, '$'+Number(gv('toll-'+c.id)).toFixed(2));
+
+    const r = calcRevenue(c);
+    totalAnnual  += r.total;
+    totalWkday   += r.weekday;
+    totalWkend   += r.weekend;
+    totalDailyVeh += r.avgDailyVeh;
+    wkD.push(+(r.weekday/1e6).toFixed(1));
+    weD.push(+(r.weekend/1e6).toFixed(1));
+
+    sv('rev-'+c.id, fmt(r.total)+'/yr');
+    sv('pk-'+c.id,  fmt(r.weekday));
+    sv('we-'+c.id,  fmt(r.weekend));
+  });
+
+  sv('totalRev',   fmt(totalAnnual));
+  sv('transitRev', fmt(totalAnnual * transitPct));
+  sv('totalVeh',   totalDailyVeh.toLocaleString());
+  sv('splitRev',   fmt(totalWkday)+' / '+fmt(totalWkend));
+
+  chart.data.datasets[0].data = wkD;
+  chart.data.datasets[1].data = weD;
+  chart.update('none');
+}
+
+update();
+</script>
+</body>
+</html>
