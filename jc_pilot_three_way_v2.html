@@ -1,0 +1,115 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1.25rem 0;font-size:14px;color:var(--color-text-primary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.grid{display:grid;grid-template-columns:168px repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);overflow:hidden}
+.hdr-cell{padding:.7rem .8rem;font-size:13px;border-bottom:1px solid var(--color-border-secondary);border-left:1px solid var(--color-border-tertiary);background:var(--color-background-primary)}
+.hdr-accent{height:3px;border-radius:2px;margin-bottom:5px}
+.hdr-name{font-weight:500}
+.hdr-sub{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.section-row{grid-column:1/-1;padding:.45rem .8rem;font-size:11px;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;background:var(--color-background-secondary);border-top:1.5px solid var(--color-border-secondary);border-bottom:1px solid var(--color-border-secondary)}
+.lc{padding:.5rem .8rem;font-size:13px;color:var(--color-text-secondary);border-bottom:1px solid var(--color-border-tertiary);background:var(--color-background-primary)}
+.vc{padding:.5rem .8rem;font-size:13px;border-bottom:1px solid var(--color-border-tertiary);border-left:1px solid var(--color-border-tertiary);background:var(--color-background-primary)}
+.alt .lc,.alt .vc{background:#f0f2f5 !important}
+.lc,.vc{border-bottom:1px solid #d0d5dd;border-right:none}
+.vc{border-left:1px solid #d0d5dd}
+.grid{border:1px solid #c5ccd6}
+.hdr-cell{border-bottom:2px solid #c5ccd6;border-left:1px solid #d0d5dd}
+.section-row{background:#e8eaed;border-top:1.5px solid #b0b8c4;border-bottom:1px solid #b0b8c4}
+.hl .lc,.hl .vc{background:var(--color-background-secondary);font-weight:500}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:1px 7px;border-radius:12px}
+.bg{background:#EAF3DE;color:#27500A}
+.ba{background:#FAEEDA;color:#633806}
+.br{background:#FCEBEB;color:#791F1F}
+.bb{background:#E6F1FB;color:#0C447C}
+.bgr{background:#F1EFE8;color:#444441}
+.g{color:#1D9E75}.w{color:#BA7517}.r{color:#E24B4A}.m{color:var(--color-text-secondary)}
+.chart-wrap{margin:1.75rem 0 .25rem}
+.br-row:first-of-type{margin-top:6px}
+.ct{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.br-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bl{font-size:12px;color:var(--color-text-secondary);width:110px;flex-shrink:0;text-align:right}
+.bt{flex:1;height:20px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden;position:relative}
+.bf{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden}
+.bref{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--color-text-primary);opacity:.7}
+.bref::after{content:'conv';position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--color-text-secondary);white-space:nowrap}
+.note{font-size:11px;color:var(--color-text-secondary);margin-top:1.25rem;padding-top:.75rem;border-top:0.5px solid var(--color-border-tertiary);line-height:1.6}
+</style>
+
+<h2 class="sr-only">Three-way comparison of Jersey City PILOT agreements: 177 Grand Street (Silverman), Canal Crossing (Boraie), and Embankment (Albanese). Includes 30-year revenue breakdown for city, schools, and county under both PILOT and conventional taxation.</h2>
+
+<div class="wrap">
+<div class="grid">
+
+  <div class="hdr-cell" style="border-left:none"></div>
+  <div class="hdr-cell">
+    <div class="hdr-accent" style="background:#185FA5"></div>
+    <div class="hdr-name">177 Grand St</div>
+    <div class="hdr-sub">Silverman · 413 units · NW Financial</div>
+  </div>
+  <div class="hdr-cell">
+    <div class="hdr-accent" style="background:#1D9E75"></div>
+    <div class="hdr-name">Canal Crossing</div>
+    <div class="hdr-sub">Boraie / Hampshire · 508 units · TBG</div>
+  </div>
+  <div class="hdr-cell">
+    <div class="hdr-accent" style="background:#BA7517"></div>
+    <div class="hdr-name">Embankment</div>
+    <div class="hdr-sub">Albanese · 604 units · NW Financial</div>
+  </div>
+
+  <div class="section-row">Project basics</div>
+  <div class="lc">Address</div><div class="vc">177 Grand St</div><div class="vc">850–902 Garfield Ave</div><div class="vc">437 Marin Blvd</div>
+  <div class="lc alt">Developer</div><div class="vc alt">Silverman</div><div class="vc alt">Boraie / Hampshire</div><div class="vc alt">Albanese (JC Embankment)</div>
+  <div class="lc">Building height</div><div class="vc">28 + 17 stories (2 towers)</div><div class="vc">6 (1A) / 10 (1B)</div><div class="vc">40 stories</div>
+  <div class="lc alt">Total dev cost</div><div class="vc alt">$229.7M ($556K/unit)</div><div class="vc alt">$318M ($626K/unit)</div><div class="vc alt">$360M ($596K/unit)</div>
+  <div class="lc">Aspire / LIHTC</div>
+  <div class="vc"><span class="badge bb">LIHTC only</span></div>
+  <div class="vc"><span class="badge bb">Aspire + LIHTC</span></div>
+  <div class="vc"><span class="badge bgr">Neither</span></div>
+
+  <div class="section-row">Affordability</div>
+  <div class="lc">Affordable units</div><div class="vc">62 <span class="m">(15%)</span></div><div class="vc">102 <span class="m">(20%)</span></div><div class="vc">30 <span class="m">(5%)</span></div>
+  <div class="lc alt">AMI targeting</div><div class="vc alt">30%/50%/80% AMI (UHAC)</div><div class="vc alt">47% blended — 50%/30% AMI, $1,750/mo 2BR</div><div class="vc alt">50–80% AMI (UHAC)</div>
+  <div class="lc">Affordable trust payment</div><div class="vc"><span class="m">—</span></div><div class="vc"><span class="m">—</span></div><div class="vc">$1,001,541</div>
+
+  <div class="section-row">PILOT rate structure</div>
+  <div class="lc">Opening rate (yrs 1–15)</div>
+  <div class="vc"><span class="badge bb">12% AGR</span></div>
+  <div class="vc"><span class="badge ba">10% AGR</span></div>
+  <div class="vc"><span class="badge ba">10% AGR</span></div>
+  <div class="lc">Later years</div><div class="vc">Steps to 13% (yrs 16–30)</div><div class="vc">Steps to 12% (yrs 26–30)</div><div class="vc"><span class="badge bgr">Flat 10% all 30 yrs</span></div>
+
+  <div class="section-row">Developer feasibility</div>
+  <div class="lc">IRR — full tax / PILOT</div><div class="vc"><span class="r">7.04%</span> / <span class="g">9.37%</span></div><div class="vc"><span class="r">4.8%</span> / <span class="g">9.8%</span></div><div class="vc"><span class="r">5.1%</span> / <span class="w">7.9%</span></div>
+  <div class="lc alt">YOC — full tax / PILOT</div><div class="vc alt"><span class="w">5.51%</span> / <span class="g">5.94%</span></div><div class="vc alt"><span class="r">4.2%</span> / <span class="g">6.2%</span></div><div class="vc alt"><span class="r">5.4%</span> / <span class="w">6.0%</span></div>
+  <div class="lc">DSCR — full tax / PILOT</div><div class="vc"><span class="w">1.14</span> / <span class="g">1.23</span></div><div class="vc"><span class="r">0.81</span> / <span class="g">1.21</span></div><div class="vc"><span class="w">1.17</span> / <span class="g">1.29</span></div>
+  <div class="lc alt">Stabilized AGR</div><div class="vc alt">$20.0M</div><div class="vc alt">$27.6M</div><div class="vc alt">$30.5M</div>
+
+  <div class="section-row">30-year public revenue — PILOT vs conventional</div>
+
+  <div class="lc">City — PILOT</div><div class="vc">$97.6M</div><div class="vc">$87.8M</div><div class="vc">~$122.7M</div>
+  <div class="lc alt">City — conv tax</div><div class="vc alt">$54.0M</div><div class="vc alt">~$58.9M</div><div class="vc alt">~$82.7M</div>
+  <div class="lc">City net</div><div class="vc"><span class="g">+$43.7M</span></div><div class="vc"><span class="g">+$28.9M</span></div><div class="vc"><span class="g">+$40.0M</span></div>
+
+  <div class="lc alt">Schools — PILOT (BOE trust)</div><div class="vc alt"><span class="r">$0 — no trust</span></div><div class="vc alt"><span class="g">$8.0M (10% of ASC)</span></div><div class="vc alt"><span class="r">$0 — no trust</span></div>
+  <div class="lc">Schools — conv tax</div><div class="vc">~$63.2M</div><div class="vc">~$68.9M</div><div class="vc">~$96.8M</div>
+  <div class="lc alt">Schools net</div><div class="vc alt"><span class="r">−$63.2M</span></div><div class="vc alt"><span class="r">−$60.9M</span></div><div class="vc alt"><span class="r">−$96.8M</span></div>
+
+  <div class="lc">County — PILOT</div><div class="vc">~$5.0M</div><div class="vc">~$6.0M</div><div class="vc">~$6.3M</div>
+  <div class="lc alt">County — conv tax</div><div class="vc alt">~$24.5M</div><div class="vc alt">~$26.7M</div><div class="vc alt">~$37.6M</div>
+  <div class="lc">County net</div><div class="vc"><span class="r">−$19.5M</span></div><div class="vc"><span class="r">−$20.7M</span></div><div class="vc"><span class="r">−$31.2M</span></div>
+
+
+  <div class="section-row">Community benefits &amp; context</div>
+  <div class="lc">Park / open space</div><div class="vc"><span class="m">None specified</span></div><div class="vc">Garfield Park (33K SF)</div><div class="vc">Block 2 Park + baseball field</div>
+  <div class="lc alt">Infrastructure</div><div class="vc alt">Storm water management and space for a new private school</div><div class="vc alt">Morris Canal Greenway ext.</div><div class="vc alt">Grand staircase, pedestrian bridge</div>
+  <div class="lc">Final negotiated rate</div><div class="vc">12% (opening, steps up)</div><div class="vc">10% (opening, steps up)</div><div class="vc">10% flat — no step-up</div>
+
+</div>
+
+<div class="note">
+  Sources: NW Financial memo + Ord. 25-101 (177 Grand); TBG feasibility slides + Ord. 26-045/046 (Canal Crossing); NW Financial memo + Ord. 25-118 (Embankment). County conv tax shares modeled at 17.3% of assessed OAT (pro-rata from stated year-1 figures). 30-yr projections use 2% annual growth. Schools receive nothing under any of these PILOTs except Canal Crossing's BOE trust (~$8M). County conv tax tick mark exceeds bar width on county chart — all three PILOTs reduce county revenue by $19–31M vs full taxation. 177 Grand IRR/YOC are NW Financial's Year-2 / 10-year-sale figures and may rest on a different return basis than the other two projects.
+</div>
+</div>

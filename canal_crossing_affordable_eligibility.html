@@ -1,0 +1,192 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.w{padding:1.25rem 0;font-size:15px;color:var(--color-text-primary)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.row{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.row label{font-size:14px;color:var(--color-text-secondary);width:160px;flex-shrink:0}
+.row input[type=range]{flex:1}
+.row .val{font-size:14px;font-weight:500;min-width:70px;text-align:right}
+.row select{flex:1}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:1.25rem 0}
+.mc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.85rem 1rem}
+.mc .lbl{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.mc .num{font-size:22px;font-weight:500}
+.result{border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin:1rem 0}
+.result-head{font-size:16px;font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.result-body{font-size:13px;line-height:1.6}
+.eligible{background:#EAF3DE;border:0.5px solid #3B6D11}
+.eligible .result-head{color:#27500A}
+.eligible .result-body{color:#3B6D11}
+.ineligible{background:#FCEBEB;border:0.5px solid #A32D2D}
+.ineligible .result-head{color:#791F1F}
+.ineligible .result-body{color:#A32D2D}
+.borderline{background:#FAEEDA;border:0.5px solid #854F0B}
+.borderline .result-head{color:#633806}
+.borderline .result-body{color:#854F0B}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:1.25rem 0}
+.unit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:.75rem}
+.unit-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.65rem .85rem}
+.unit-card.avail{border-color:#3B6D11;background:#EAF3DE}
+.unit-card.avail .ut{color:#27500A}
+.unit-card.avail .ur{color:#3B6D11}
+.unit-card.unavail{opacity:.5}
+.ut{font-size:13px;font-weight:500;margin-bottom:2px}
+.ur{font-size:12px;color:var(--color-text-secondary)}
+.note{font-size:12px;color:var(--color-text-secondary);margin-top:1rem;line-height:1.6;padding-top:.75rem;border-top:0.5px solid var(--color-border-tertiary)}
+.pct-bar{height:6px;background:var(--color-background-secondary);border-radius:3px;margin-top:6px;overflow:hidden}
+.pct-fill{height:100%;border-radius:3px;transition:width .3s}
+</style>
+
+<h2 class="sr-only">Affordable housing eligibility calculator for Canal Crossing in Jersey City. Enter your household size and income to see if you qualify for a unit at 50% AMI under the 2026 UHAC limits for Region 1 (Hudson County).</h2>
+
+<div class="w">
+
+  <div class="row">
+    <label for="sl-size">Household size</label>
+    <input type="range" id="sl-size" min="1" max="8" step="1" value="2">
+    <span class="val" id="out-size">2 people</span>
+  </div>
+
+  <div class="row">
+    <label for="sl-income">Annual household income</label>
+    <input type="range" id="sl-income" min="10000" max="130000" step="1000" value="45000">
+    <span class="val" id="out-income">$45,000</span>
+  </div>
+
+  <div class="row">
+    <label for="sel-br">Preferred unit size</label>
+    <select id="sel-br">
+      <option value="0">Studio</option>
+      <option value="1" selected>1 bedroom</option>
+      <option value="2">2 bedroom</option>
+      <option value="3">3 bedroom</option>
+    </select>
+    <span class="val" style="color:var(--color-text-secondary);font-size:12px" id="out-occ"></span>
+  </div>
+
+  <div class="cards">
+    <div class="mc"><div class="lbl">50% AMI limit for your household</div><div class="num" id="m-limit">—</div></div>
+    <div class="mc"><div class="lbl">Your income as % of AMI</div><div class="num" id="m-pct">—</div><div class="pct-bar"><div class="pct-fill" id="pct-fill" style="background:#1D9E75;width:0%"></div></div></div>
+    <div class="mc"><div class="lbl">Max rent at 50% AMI</div><div class="num" id="m-rent">—</div><div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px" id="m-rent-sub"></div></div>
+    <div class="mc"><div class="lbl">Rent-to-income ratio</div><div class="num" id="m-rti">—</div><div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">30% is the standard threshold</div></div>
+  </div>
+
+  <div class="result" id="result-box">
+    <div class="result-head" id="result-head"></div>
+    <div class="result-body" id="result-body"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px">Which unit types would you qualify for?</div>
+  <div class="unit-grid" id="unit-grid"></div>
+
+  <div class="note" id="note-text"></div>
+</div>
+
+<script>
+const REGION1_50PCT = {1:45350,2:51800,3:58300,4:64750,5:69950,6:75150,7:80300,8:85500};
+const REGION1_MEDIAN = {1:90700,2:103600,3:116600,4:129500,5:139900,6:150300,7:160600,8:171000};
+
+// Published Region 1 50% AMI limits for half-person household sizes (2026 UHAC table)
+const REGION1_50PCT_OCC = {1:45350,1.5:48575,3:58300,4.5:67350};
+
+const UHAC_OCCUPANCY = {0:'1 person',1:'1.5 persons',2:'3 persons',3:'4.5 persons'};
+const UHAC_OCC_SIZE  = {0:1,1:1.5,2:3,3:4.5};
+
+const UNIT_COUNTS = {0:55,1:276,2:153,3:25};
+const UNIT_AFFORDABLE = {0:null,1:null,2:89,3:null};
+
+function maxRent(br){
+  const occSize = UHAC_OCC_SIZE[br];
+  const incLimit = REGION1_50PCT_OCC[occSize];
+  return Math.round(incLimit*0.30/12);
+}
+
+function fmt(n){return '$'+Math.round(n).toLocaleString();}
+function fmtMo(n){return '$'+Math.round(n).toLocaleString()+'/mo';}
+
+function update(){
+  const size   = +document.getElementById('sl-size').value;
+  const income = +document.getElementById('sl-income').value;
+  const br     = +document.getElementById('sel-br').value;
+
+  document.getElementById('out-size').textContent   = size===1?'1 person':size+' people';
+  document.getElementById('out-income').textContent = fmt(income);
+  document.getElementById('out-occ').textContent    = 'UHAC occupancy: '+UHAC_OCCUPANCY[br];
+
+  const limit = REGION1_50PCT[size];
+  const median = REGION1_MEDIAN[size];
+  const pct   = Math.round(income/median*100);        // income as % of AMI (median = 100%)
+  const ofCeiling = Math.round(income/limit*100);     // income as % of the 50% ceiling
+  const rent  = maxRent(br);
+  const rti   = Math.round(rent*12/income*100);
+
+  document.getElementById('m-limit').textContent = fmt(limit);
+  document.getElementById('m-pct').textContent   = pct+'%';
+  document.getElementById('m-rent').textContent  = fmtMo(rent);
+  document.getElementById('m-rent-sub').textContent = 'for a '+['studio','1BR','2BR','3BR'][br];
+  document.getElementById('m-rti').textContent   = rti+'%';
+
+  const fillW = Math.min(100,ofCeiling);
+  const fillEl = document.getElementById('pct-fill');
+  fillEl.style.width = fillW+'%';
+  fillEl.style.background = ofCeiling<=80?'#1D9E75':ofCeiling<=100?'#BA7517':'#E24B4A';
+
+  const box  = document.getElementById('result-box');
+  const head = document.getElementById('result-head');
+  const body = document.getElementById('result-body');
+
+  if(ofCeiling>100){
+    box.className='result ineligible';
+    head.innerHTML='<i class="ti ti-x" aria-hidden="true"></i> Not income-eligible';
+    body.textContent='Your household income of '+fmt(income)+' is '+pct+'% of AMI — above the 50% AMI ceiling of '+fmt(limit)+' for a '+size+'-person household. Canal Crossing\'s affordable units are capped at 50% AMI.';
+  } else if(ofCeiling>=90){
+    box.className='result borderline';
+    head.innerHTML='<i class="ti ti-alert-triangle" aria-hidden="true"></i> Income-eligible, but close to the limit';
+    body.textContent='Your income is '+pct+'% of AMI, which qualifies — but you\'re near the 50% ceiling of '+fmt(limit)+'. Income will be verified at application, and any additional sources count toward the limit.';
+  } else {
+    box.className='result eligible';
+    head.innerHTML='<i class="ti ti-check" aria-hidden="true"></i> Income-eligible';
+    body.textContent='Your household income of '+fmt(income)+' is '+pct+'% of AMI, within the 50% AMI limit of '+fmt(limit)+' for a '+size+'-person household. You may qualify for a restricted unit at Canal Crossing.';
+  }
+
+  const grid = document.getElementById('unit-grid');
+  grid.innerHTML='';
+  [{br:0,label:'Studio',count:UNIT_COUNTS[0]},
+   {br:1,label:'1 bedroom',count:UNIT_COUNTS[1]},
+   {br:2,label:'2 bedroom',count:UNIT_COUNTS[2]},
+   {br:3,label:'3 bedroom',count:UNIT_COUNTS[3]}
+  ].forEach(u=>{
+    const r=maxRent(u.br);
+    const occ=UHAC_OCC_SIZE[u.br];
+    const minHH = occ<=1?1:occ<=1.5?1:occ<=3?2:3;
+    const maxHH = occ<=1?2:occ<=1.5?2:occ<=3?4:6;
+    const sizeOk = size>=minHH && size<=maxHH;
+    const incomeOk = ofCeiling<=100;
+    const available = u.br===2;
+    const ok = sizeOk && incomeOk && available;
+    const d=document.createElement('div');
+    d.className='unit-card'+(ok?' avail':' unavail');
+    const availLabel = !available
+      ? '<br><span style="font-size:11px;opacity:.7">No affordable units in this type</span>'
+      : !sizeOk
+      ? '<br><span style="font-size:11px;opacity:.7">UHAC occupancy: '+occ+' persons</span>'
+      : !incomeOk
+      ? '<br><span style="font-size:11px;opacity:.7">Over income limit</span>'
+      : '';
+    d.innerHTML='<div class="ut">'+u.label+'</div><div class="ur">Max rent: '+fmtMo(r)+(ok?' — you qualify':'')+availLabel+'</div>';
+    grid.appendChild(d);
+  });
+
+  document.getElementById('note-text').innerHTML=
+    '<strong>How eligibility works:</strong> Income limits are per the 2026 UHAC limits for Region 1 (Hudson County), effective June 15, 2026. Canal Crossing\'s affordable units are capped at <strong>50% AMI</strong> — stricter than the standard UHAC ceiling of 80%. Max rents are calculated at 30% of the UHAC-applicable household income for each bedroom size (e.g., a 2BR unit uses a 3-person household income). '+
+    '<strong>Important:</strong> Canal Crossing\'s 102 affordable units are all 2-bedroom units at or below 50% AMI (89 units at 50% AMI, 13 units at 30% AMI). Studios, 1BR, and 3BR units at this building are <em>market rate only</em>. Max rents shown are gross rents (30% of UHAC-applicable household income) before any utility allowance, which would lower the actual contract rent. Eligibility does not guarantee a unit — there will be a lottery or waitlist process managed by the developer.';
+}
+
+document.getElementById('sl-size').addEventListener('input',update);
+document.getElementById('sl-income').addEventListener('input',update);
+document.getElementById('sel-br').addEventListener('change',update);
+update();
+</script>
